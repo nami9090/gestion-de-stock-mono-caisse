@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}
+  Vente | Supprimer | Admin
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="card mb-4 shadow-lg">
+        <div class="card-header m-0 font-weight-bold text-primary">
+            Retirer {{ item.product.name }} de la vente ?
+        </div>
+    </div>
+    <div class="card shadow">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-danger">
+                Confirmer la suppression
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Confirmer</button>
+                <a href="{% url 'sale_create' %}" class="btn btn-secondary btn-sm">Annuler</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

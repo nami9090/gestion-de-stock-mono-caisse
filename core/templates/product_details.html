@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}
+  Stock - Liste | Admin
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="card mb-4 shadow-lg">
+        <div class="card-header m-0 font-weight-bold text-primary">
+            Detail du produit
+        </div>
+        <div class="py-1" >
+            <a href="{% url 'product_update' product.id %}" class="btn btn-warning btn-sm">
+                Modifier
+            </a>
+            <a href="{% url 'product_delete' product.id %}" class="btn btn-danger btn-sm">
+                Supprimer
+            </a>
+        </div>
+    </div>
+    <div class="card shadow">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">
+                {{ product.name }}
+            </h6>
+        </div>
+        <div class="card-body">
+            <p><strong>Catégorie :</strong> {{ product.category }}</p>
+
+            <p>
+                <strong>Prix d'achat :</strong>
+                {{ product.purchase_price|intcomma }} BIF
+            </p>
+
+            <p>
+                <strong>Prix de vente :</strong>
+                {{ product.selling_price|intcomma }} BIF
+            </p>
+
+            <p>
+                <strong>Marge unitaire :</strong>
+                <span class="badge bg-info">
+                    {{ product.profit_margin|intcomma }} BIF
+                </span>
+            </p>
+
+            <p>
+                <strong>Stock actuel :</strong>
+                {% if product.stock <= product.minimum_stock %}
+                    <span class="badge bg-danger">
+                        {{ product.stock }}
+                    </span>
+                {% else %}
+                    <span class="badge bg-success">
+                        {{ product.stock }}
+                    </span>
+                {% endif %}
+            </p>
+
+            <p>
+                <strong>Valeur totale du stock :</strong>
+                <span class="fw-bold">
+                    {{ product.stock_value|intcomma }} BIF
+                </span>
+            </p>
+
+            <p>
+                <strong>Stock minimum :</strong>
+                {{ product.minimum_stock }}
+            </p>
+
+            <p>
+                <strong>Créé le :</strong>
+                {{ product.created_at|date:"Y-m-d H:i" }}
+            </p>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'product_list' %}" class="btn btn-secondary btn-sm">
+                Retour à la liste
+            </a>
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+{% endblock %}

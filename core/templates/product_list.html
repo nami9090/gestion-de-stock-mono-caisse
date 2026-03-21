@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}
+  Produits | Admin
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="card mb-4 shadow-lg">
+        <div class="card-header m-0 font-weight-bold text-primary">
+            Gestion des produits
+        </div>
+    </div>
+    <div class="card shadow">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">
+                Liste des produits
+            </h6>
+        </div>
+        <div class="card-body">
+            <a href="{% url 'product_create' %}" class="btn btn-primary btn-sm mb-3">
+                Ajouter Produit
+            </a>
+            <div class="table-responsive">
+                <div class="input-group">
+                   <input type="text" id="searchInput" class="form-control mb-2" placeholder="Rechercher ici...">
+                </div>
+                <table class="table table-sm table-bordered" id="dataTable">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Nom</th>
+                            <th>Catégorie</th>
+                            <th>Prix Achat</th>
+                            <th>Prix Vente</th>
+                            <th>Marge</th>
+                            <!-- <th>Marge Total</th> -->
+                            <th>Stock</th>
+                            <th>Valeur Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in produits %}
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.category }}</td>
+                            <td>{{ product.purchase_price|intcomma }} {{shop.currency}}</td>
+                            <td>{{ product.selling_price|intcomma }} {{shop.currency}}</td>
+
+                            <!-- Marge -->
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ product.profit_margin|intcomma }} {{shop.currency}}
+                                </span>
+                            </td>
+                            <!-- <td>
+                                <span class="badge bg-info">
+                                    {{ product.marge_total|intcomma }} {{shop.currency}}
+                                </span>
+                            </td> -->
+
+                            <!-- Stock -->
+                            <td>
+                                {% if product.stock <= product.minimum_stock %}
+                                    <span class="badge bg-danger">
+                                        {{ product.stock }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success">
+                                        {{ product.stock }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Valeur du stock -->
+                            <td>
+                                <strong>{{ product.stock_value|intcomma }} {{shop.currency}}</strong>
+                            </td>
+                            <td>
+                                <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-info btn-sm">Voir</a>
+                                <a href="{% url 'product_update' product.id %}" class="btn btn-sm btn-warning btn-sm">Modifier</a>
+                                <a href="{% url 'product_delete' product.id %}" class="btn btn-sm btn-danger btn-sm">Supprimer</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">Aucun produit enregistré</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+<script>
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+    const searchValue = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+
+    rows.forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        row.style.display = rowText.includes(searchValue) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}

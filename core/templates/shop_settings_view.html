@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}
+  Parametre | Admin
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="card mb-4 shadow-lg">
+        <div class="card-header m-0 font-weight-bold text-primary">
+            Paramètres du magasin
+        </div>
+    </div>
+    <div class="card shadow">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">
+                xxxxxxx-xxxxxxx
+            </h6>
+        </div>
+        <div class="card-body">
+            <!-- <a href=" " class="btn btn-primary btn-sm mb-3">
+                Ajouter
+            </a> -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary btn-sm">Enregistrer</button>
+            </form>
+
+            <!-- <div class="table-responsive">
+                <div class="input-group">
+                   <input type="text" id="searchInput" class="form-control mb-2" placeholder="Rechercher ici...">
+                </div>
+                
+            </div> -->
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+<script>
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+    const searchValue = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+
+    rows.forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        row.style.display = rowText.includes(searchValue) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}

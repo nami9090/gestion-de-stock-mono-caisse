@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}
+  Supplier - Liste | Admin
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="card mb-4 shadow-lg">
+        <div class="card-header m-0 font-weight-bold text-primary">
+            Gestion des fournisseurs
+        </div>
+    </div>
+    <div class="card shadow">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">
+                Liste des fournisseur
+            </h6>
+        </div>
+        <div class="card-body">
+            <a href="{% url 'supplier_create' %}" class="btn btn-primary btn-sm mb-3">
+                Ajouter fournisseur
+            </a>
+            <div class="table-responsive">
+                <div class="input-group">
+                   <input type="text" id="searchInput" class="form-control mb-2" placeholder="Rechercher ici...">
+                </div>
+                <table class="table table-sm table-bordered" id="dataTable">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Nom</th>
+                            <th>Téléphone</th>
+                            <th>Email</th>
+                            <th>Adresse</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for supplier in suppliers %}
+                        <tr>
+                            <td>{{ supplier.name }}</td>
+                            <td>{{ supplier.phone }}</td>
+                            <td>{{ supplier.email }}</td>
+                            <td>{{ supplier.address }}</td>
+                            <td>
+                                <a href="{% url 'supplier_update' supplier.id %}" class="btn btn-sm btn-warning">Modifier</a>
+                                <a href="{% url 'supplier_delete' supplier.id %}" class="btn btn-sm btn-danger">Supprimer</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Aucun fournisseur</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+<script>
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+    const searchValue = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+
+    rows.forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        row.style.display = rowText.includes(searchValue) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}
+  Vente | Supprimer | Admin
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="card mb-4 shadow-lg">
+        <div class="card-header m-0 font-weight-bold text-primary">
+            Annuler la vente #{{ sale.id }} ?
+        </div>
+    </div>
+    <div class="card shadow">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-danger">
+                Cette action remettra le stock et supprimera la vente.
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    Confirmer l'annulation
+                </button>
+
+                <a href="{% url 'sale_create' %}" class="btn btn-secondary">
+                    Retour
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

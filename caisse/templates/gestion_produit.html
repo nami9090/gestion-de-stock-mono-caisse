@@ -1,0 +1,109 @@
+{% extends 'base_caisse.html' %}
+{% block title %}
+  Produits | Caisse
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="card mb-4 shadow-lg">
+        <div class="card-header m-0 font-weight-bold text-primary">
+            Gestion des produits
+        </div>
+    </div>
+    <div class="card shadow">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">
+                Liste des produits
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <div class="input-group">
+                   <input type="text" id="searchInput" class="form-control mb-3" placeholder="Rechercher ici...">
+                </div>
+                {% if produits.has_other_pages %}
+                <nav>
+                  <ul class="pagination pagination-sm">
+                    {% if produits.has_previous %}
+                      <li class="page-item">
+                        <a class="page-link" href="?pages_product={{ produits.previous_page_number }}">«</a>
+                      </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                      <span class="page-link">
+                        Page {{ produits.number }} / {{ produits.paginator.num_pages }}
+                      </span>
+                    </li>
+
+                    {% if produits.has_next %}
+                      <li class="page-item">
+                        <a class="page-link" href="?pages_product={{ produits.next_page_number }}">»</a>
+                      </li>
+                    {% endif %}
+                  </ul>
+                </nav>
+                {% endif %}
+                <table class="table table-sm table-bordered" id="dataTable">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Nom</th>
+                            <th>Catégorie</th>
+                            <th>Prix Achat</th>
+                            <th>Prix Vente</th>
+                            <th>Marge par produit</th>
+                            <th>Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in produits %}
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.category }}</td>
+                            <td>{{ product.purchase_price|intcomma }} {{shop.currency}}</td>
+                            <td>{{ product.selling_price|intcomma }} {{shop.currency}}</td>
+
+                            <!-- Marge -->
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ product.profit_margin|intcomma }} {{shop.currency}}
+                                </span>
+                            </td>
+                            <td>
+                                {% if product.stock <= product.minimum_stock %}
+                                    <span class="badge bg-danger">
+                                        {{ product.stock }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success">
+                                        {{ product.stock }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">Aucun produit enregistré</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+<script>
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+    const searchValue = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+
+    rows.forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        row.style.display = rowText.includes(searchValue) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}
