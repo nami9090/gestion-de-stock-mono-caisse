@@ -440,3 +440,6 @@ def generate_invoice(request, pk):
     response.write(pdf)
 
     return response
+
+def test():
+    pass
