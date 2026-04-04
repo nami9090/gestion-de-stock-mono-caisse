@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block title %}
+  Dashboard | {% if user.is_authenticated %}{{ user.username }}{% endif %}
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<!-- Main Content -->
+<div id="content">
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        </div>
+        <!-- Content Row -->
+        <div class="row">
+            <!-- Earnings (Monthly) Card Example -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Chiffre total</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ shop.currency }} {{ total_sales.total_amount|intcomma }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-cash fa-2x"></i></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Earnings (Monthly) Card Example -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Profit total
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ shop.currency }} {{ total_sales.total_profit|intcomma }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-cash fa-2x"></i></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Earnings (Monthly) Card Example -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Produits faible stock
+                                </div>
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-auto">
+                                        <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                                            {{ low_stock|length }}
+                                        </div>
+                                    </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-info" role="progressbar"
+                                                style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"> 
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Pending Requests Card Example -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Sales Pending Requests
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ sale_count }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-comments fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Content Row -->
+        <div class="row">
+            <div class="col-xl-12 col-lg-12 mb-3">
+                <!--Ventes récentes -->
+                <div class="card shadow">
+                    <div class="card-header">Ventes récentes</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>ID Vente</th>
+                                        <th>Date</th>
+                                        <th>Montant</th>
+                                        <th>Profit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sale in recent_sales %}
+                                    <tr>
+                                        <td>{{ sale.id }}</td>
+                                        <td>{{ sale.created_at|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ sale.total_amount|intcomma }} {{ shop.currency }}</td>
+                                        <td>{{ sale.total_profit|intcomma }} {{ shop.currency }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4">Aucune vente encore</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-xl-6 col-lg-6">
+                <!--Top produits vendus -->
+                <div class="card mb-2 shadow">
+                    <div class="card-header">Top produits vendus</div>
+                    <div class="card-body">
+                        <ul>
+                            {% for p in top_products %}
+                            <li>{{ p.product__name }} - {{ p.total_qty }} unités</li>
+                            {% empty %}
+                            <li>Aucun produit vendu encore</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 col-lg-6">
+                <!--Stock faible -->
+                <div class="card shadow">
+                    <div class="card-header">Produits avec stock faible</div>
+                    <div class="card-body">
+                        <ul>
+                            {% for product in low_stock %}
+                            <li>{{ product.name }} - {{ product.stock }} unités</li>
+                            {% empty %}
+                            <li>Tout le stock est suffisant</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</div>
+<!-- End of Main Content -->
+{% endblock %}

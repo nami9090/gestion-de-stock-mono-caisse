@@ -6,6 +6,5 @@ def create_roles():
         "Admin",
         "Caisse"
     ]
-
     for role_name in roles:
         Group.objects.get_or_create(name=role_name)

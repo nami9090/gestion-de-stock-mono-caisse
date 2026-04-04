@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}
+  Produits | Admin
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="card shadow border-danger">
+         <div class="card-header bg-danger text-white">
+            Confirmer la suppression
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <h6 class="mb-3 text-primary">
+                    Voulez-vous supprimer "{{ product.name }}" ?
+                </h6>
+                <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                <a href="{% url 'products:product_list' %}" class="btn btn-secondary btn-sm">Annuler</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}
+  Categorie Form | Admin
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="card mb-4 shadow-lg">
+        <div class="card-header m-0 font-weight-bold text-primary">
+            Formulaire categorie
+        </div>
+    </div>
+    <div class="card shadow">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">
+                Ajouter categorie produit
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-success btn-sm">Enregistrer</button>
+                <a href="{% url 'products:category_list' %}" class="btn btn-secondary btn-sm">Annuler</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

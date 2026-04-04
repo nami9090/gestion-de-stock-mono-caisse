@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title %}
+  Gestion utilisateur | Admin
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="card mb-4 shadow-lg">
+        <div class="card-header m-0 font-weight-bold text-primary">
+            GESTION DES UTILISATEURS
+        </div>
+    </div>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+    <div class="card shadow">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">
+               Gestion des utilisateurs 
+            </h6>
+        </div>
+        <div class="card-body">
+            <a href="{% url 'user:creer_utilisateur' %}" class="btn btn-success btn-sm mb-2">Créer utilisateur</a>
+            <div class="table-responsive">
+                <div class="input-group">
+                  <input type="text" id="searchInput" class="form-control mb-3"  placeholder="Rechercher (Nom utilisateur,Email,Actif, Role...)">
+                </div>
+                {% if utilisateurs.has_other_pages %}
+                <nav>
+                  <ul class="pagination pagination-sm">
+                    {% if utilisateurs.has_previous %}
+                      <li class="page-item">
+                        <a class="page-link" href="?pages_user={{ utilisateurs.previous_page_number }}">«</a>
+                      </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                      <span class="page-link">
+                        Page {{ utilisateurs.number }} / {{ utilisateurs.paginator.num_pages }}
+                      </span>
+                    </li>
+
+                    {% if utilisateurs.has_next %}
+                      <li class="page-item">
+                        <a class="page-link" href="?pages_user={{ utilisateurs.next_page_number }}">»</a>
+                      </li>
+                    {% endif %}
+                  </ul>
+                </nav>
+                {% endif %}
+                <table class="table table-sm table-bordered" id="dataTable">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Utilisateur</th>
+                            <th>Email</th>
+                            <th>Actif</th>
+                            <th>Groupes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for u in utilisateurs %}
+                        <tr>
+                            <td>{{ u.username }}</td>
+                            <td>{{ u.email }}</td>
+                            <td>
+                                {% if u.is_active %}
+                                    <span class="badge text-white bg-success btn-sm">Actif</span>
+                                {% else %}
+                                    <span class="badge text-white bg-danger btn-sm">Inactif</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for g in u.groups.all %}
+                                <span class="badge text-white {% if g.name == 'Admin' %}bg-danger {% elif g.name == 'Gestion licences' %}bg-primary {% elif g.name == 'Logistique' %}bg-warning text-dark {% elif g.name == 'Lecture seule' %}bg-secondary {% else %}bg-info{% endif %}">
+                                    {{ g.name }}
+                                </span>
+                                {% empty %}
+                                    <span class="badge bg-light text-muted">Aucun rôle</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <a href="{% url 'user:update_utilisateur' u.id %}" class="btn btn-primary btn-sm">Modifier</a>
+                                <a href="{% url 'user:activer_desactiver_utilisateur' u.id %}" class="btn btn-warning btn-sm">
+                                    {% if u.is_active %}Désactiver{% else %}Activer{% endif %}
+                                </a>
+                                <!-- Lien de suppression -->
+                                <a href="{% url 'user:supprimer_utilisateur' u.id %}" class="btn btn-danger btn-sm">Supprimer</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+<script>
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+    const searchValue = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+
+    rows.forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        row.style.display = rowText.includes(searchValue) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}

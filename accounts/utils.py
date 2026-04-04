@@ -1,9 +1,9 @@
 
 def redirect_user_by_role(user):
     if user.groups.filter(name='Admin').exists():
-        return 'home'
+        return 'dashboard:dashboard'
 
     if user.groups.filter(name='Caisse').exists():
-        return 'home_caisse'
+        return 'dashboard:dashboard'
 
     return 'access_denied'
