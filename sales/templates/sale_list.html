@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}
-    Vente | Liste | Admin
+    Vente | Liste | {% if user.is_authenticated %}{{ user.username }}{% endif %}
 {% endblock %}
 {% block content %}
 {% load humanize %}
@@ -18,10 +18,13 @@
                 Liste des ventes
             </h6>
         </div>
+        {% for group in request.user.groups.all %}
         <div class="card-body">
+            {% if group.name == 'Admin' or group.name == 'Caisse' %}
             <a href="{% url 'sale:sale_create' %}" class="btn btn-primary btn-sm mb-3">
                 Nouvelle vente <i class="bi bi-plus-square"></i>
             </a>
+            {% endif %}
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }}">
@@ -31,7 +34,8 @@
             {% endif %}
             <div class="table-responsive">
                 <div class="input-group">
-                   <input type="text" id="searchInput" class="form-control mb-2" placeholder="Rechercher ici...">
+                   <input type="text" id="searchInput" class="form-control mb-2 rounded" placeholder="Rechercher ici...">
+                   <!--<span>filter</span>-->
                 </div>
                 <table class="table table-sm table-bordered" id="dataTable">
                     <thead class="table-primary">
@@ -59,13 +63,16 @@
                             <td>{{sale.customer_phone}}</td>
                             <td>
                                 <a href="{% url 'sale:sale_detail' sale.id %}" class="btn btn-info btn-sm">Voir detail <i class="bi bi-arrow-up-right-square"></i></a>
+                                {% if group.name == 'Admin' %}
                                 <a href="{% url 'sale:sale_update' sale.id %}" class="btn btn-warning btn-sm">Modifier <i class="bi bi-arrows-angle-contract"></i></a>
+    
                                 <!-- <a href="{% url 'sale:sale_delete' sale.id %}" class="btn btn-danger btn-sm">Supprimer</a> -->
+                                 {% endif %}
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center">
+                            <td colspan="7" class="text-center">
                                 Aucune vente enregistrée
                             </td>
                         </tr>
@@ -74,6 +81,7 @@
                 </table>
             </div>
         </div>
+        {% endfor %}
     </div>
 </div>
 <!-- /.container-fluid -->

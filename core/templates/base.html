@@ -59,7 +59,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                 Interface
             </div>
             {% for group in request.user.groups.all %}
-            {% if group.name == 'Admin' %}
+            {% if group.name == 'Admin' or group.name == 'Caisse' %}
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="" data-toggle="collapse" data-target="#collapseComponents" arial-expanded="true" aria-controls="collapseComponents">
@@ -73,9 +73,11 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                         <a class="collapse-item" href="{% url 'products:product_list' %}">
                            <span class="text-primary">Gestion de produit</span>
                         </a>
+                        {% if group.name == 'Admin' %}
                          <a class="collapse-item" href="{% url 'products:category_list' %}">
                            <span class="text-primary">Ajouter categorie produit</span>
                         </a>
+                        {% endif %}
                     </div>
                 </div>
             </li>

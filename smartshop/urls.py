@@ -27,7 +27,6 @@ urlpatterns = [
     path('sale/',include('sales.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('smartstock-admin/', include('core.urls')),
-    path('smartstock-caisse/', include('caisse.urls')),
 ]
 
 if settings.DEBUG:

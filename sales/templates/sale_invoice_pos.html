@@ -44,8 +44,8 @@
         </div>
         <div class="line"></div>
         Date: {{ sale.created_at|date:"d/m/Y H:i" }}<br>
-        Vente #: {{ sale.id }}
-        Nom du client: {{ sale.customer_name }}
+        Vente #: {{ sale.id }}<br>
+        Client #: {{ sale.customer_name }}
         <div class="line"></div>
         <table>
             {% for item in sale.items.all %}

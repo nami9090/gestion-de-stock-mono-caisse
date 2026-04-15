@@ -4,84 +4,88 @@
 {% endblock %}
 {% block content %}
 {% load humanize %}
-<!-- Begin Page Content -->
 <div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="card mb-4 shadow-lg">
-        <div class="card-header m-0 font-weight-bold text-primary">
-            Formulaire vente
-        </div>
-    </div>
-    <div class="card shadow mb-3">
-        <div class="card-header">
-            <h6 class="m-0 font-weight-bold text-primary">
-                Nouvelle vente
-            </h6>
-        </div>
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
-                    {{ message }}
+    <div class='row'>
+        <div class='col-md-4'>
+            <div class="card mb-4 shadow-lg">
+            <div class="card-header m-0 font-weight-bold text-primary">
+                Formulaire vente
+            </div>
+            <div class="card shadow mb-3">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        Nouvelle vente
+                    </h6>
                 </div>
-            {% endfor %}
-        {% endif %}
-        <div class="card-body">
-            <form method="POST">
-                {% csrf_token %}
-                {{ form.as_p }}
-                {{ sale_form.as_p }}
-                <button type="submit" class="btn btn-success btn-sm">
-                    Ajouter <i class="bi bi-plus-square"></i>
-                </button>
-            </form>
-        </div>
-    </div>
-    <div class="card shadow">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered">
-                    <thead class="table-primary">
-                        <tr>
-                            <th>Produit</th>
-                            <th>Qté</th>
-                            <th>Prix</th>
-                            <th>Total</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in items %}
-                        <tr>
-                            <td>{{ item.product.name }}</td>
-                            <td>{{ item.quantity }}</td>
-                            <td>{{ item.selling_price|intcomma }} {{ shop.currency }}</td>
-                            <td>{{ item.total_price|intcomma }} {{ shop.currency }}</td>
-                            <td>
-                                <a class="btn btn-danger btn-sm" href="{%  url 'sale:saleitem_delete' item.id %}">Supprimer <i class="bi bi-x-square"></i></a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center">Aucun produit ajouté</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <hr>
-                <h5>
-                    <span class="fw-bold">Total :</span>
-                    <span class="text-primary">{{ sale.total_amount|intcomma }} {{ shop.currency }}</span>
-                </h5>
-                <h6>
-                    <span class="fw-bold" >Profit :</span>
-                    <span class="text-success">{{ sale.total_profit|intcomma }} {{ shop.currency }}</span>
-                </h6>
-                {% if items %}
-                    <a href="{% url 'sale:sale_finalize' %}" class="btn btn-primary btn-sm">
-                        Finaliser la vente <i class="bi bi-check-square"></i>
-                    </a>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 {% endif %}
-                <a href="{% url 'sale:sale_list' %}" class="btn btn-secondary btn-secondary btn-sm">Retour <i class="bi bi-arrow-left-square"></i></a>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        {{ sale_form.as_p }}
+                        <button type="submit" class="btn btn-success btn-sm">
+                            Ajouter <i class="bi bi-plus-square"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class='col-md-8'>
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Qté</th>
+                                    <th>Prix</th>
+                                    <th>Total</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ item.selling_price|intcomma }} {{ shop.currency }}</td>
+                                    <td>{{ item.total_price|intcomma }} {{ shop.currency }}</td>
+                                    <td>
+                                        <a class="btn btn-danger btn-sm" href="{%  url 'sale:saleitem_delete' item.id %}">Supprimer <i class="bi bi-x-square"></i></a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">Aucun produit ajouté</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <hr>
+                        <h5>
+                            <span class="fw-bold">Total :</span>
+                            <span class="text-primary">{{ sale.total_amount|intcomma }} {{ shop.currency }}</span>
+                        </h5>
+                        <h6>
+                            <span class="fw-bold" >Profit :</span>
+                            <span class="text-success">{{ sale.total_profit|intcomma }} {{ shop.currency }}</span>
+                        </h6>
+                        {% if items %}
+                            <a href="{% url 'sale:sale_finalize' %}" class="btn btn-primary btn-sm">
+                                Finaliser la vente <i class="bi bi-check-square"></i>
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'sale:sale_list' %}" class="btn btn-secondary btn-secondary btn-sm">Retour <i class="bi bi-arrow-left-square"></i></a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

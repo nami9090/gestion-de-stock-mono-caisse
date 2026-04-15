@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}
-  Produits | Admin
+  Produits | {% if user.is_authenticated %}{{ user.username }}{% endif %}
 {% endblock %}
 {% block content %}
 {% load humanize %}
@@ -19,9 +19,13 @@
             </h6>
         </div>
         <div class="card-body">
+            {% for group in request.user.groups.all %}
+            {% if group.name == 'Admin' %}
             <a href="{% url 'products:product_create' %}" class="btn btn-primary btn-sm mb-3">
                 Ajouter Produit
             </a>
+            {% endif %}
+            
             <div class="table-responsive">
                 <div class="input-group">
                    <input type="text" id="searchInput" class="form-control mb-2" placeholder="Rechercher ici...">
@@ -37,7 +41,9 @@
                             <!-- <th>Marge Total</th> -->
                             <th>Stock</th>
                             <th>Valeur Stock</th>
+                            {% if group.name == 'Admin' %}
                             <th>Actions</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -77,11 +83,13 @@
                             <td>
                                 <strong>{{ product.stock_value|intcomma }} {{shop.currency}}</strong>
                             </td>
+                            {% if group.name == 'Admin' %}
                             <td>
                                 <a href="{% url 'products:product_detail' product.id %}" class="btn btn-sm btn-info btn-sm">Voir</a>
                                 <a href="{% url 'products:product_update' product.id %}" class="btn btn-sm btn-warning btn-sm">Modifier</a>
                                 <a href="{% url 'products:product_delete' product.id %}" class="btn btn-sm btn-danger btn-sm">Supprimer</a>
                             </td>
+                            {% endif %}
                         </tr>
                         {% empty %}
                         <tr>
@@ -91,6 +99,7 @@
                     </tbody>
                 </table>
             </div>
+            {% endfor %}
         </div>
     </div>
 </div>

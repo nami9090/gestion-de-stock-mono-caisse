@@ -8,14 +8,8 @@ class SaleForm(forms.ModelForm):
         # On ne veut pas modifier total_amount, total_profit, created_at
         fields = ['customer_name', 'customer_phone']  # éventuellement juste 'user'
         widgets = {
-            "customer_name": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Nom du client (optionnel)"
-            }),
-            "customer_phone": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Téléphone du client"
-            }),
+            'customer_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'customer_phone': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 class SaleItemForm(forms.ModelForm):

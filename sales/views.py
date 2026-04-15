@@ -27,9 +27,15 @@ from reportlab.platypus import ListFlowable, ListItem
 
 # Create your views here.
 @login_required
-@role_required('Admin')
+@role_required('Admin','Caisse')
 def sale_list(request):
-    sales = Sale.objects.filter(status='completed').order_by('-created_at')
+    if request.user.is_superuser:
+        sales = Sale.objects.filter(status='completed').order_by('-created_at')
+    else:
+        sales = Sale.objects.filter(
+            status='completed',
+            user=request.user
+        ).order_by('-created_at')
     shop = ShopSettings.objects.first()
     context = {
         'sales':sales,
@@ -39,7 +45,7 @@ def sale_list(request):
 
 
 @login_required
-@role_required('Admin')
+@role_required('Admin', 'Caisse')
 def sale_invoice(request, pk):
     sale = get_object_or_404(Sale, id=pk)
     shop = ShopSettings.objects.first()
@@ -166,7 +172,7 @@ def generate_invoice(request, pk):
     pass
 
 @login_required
-@role_required('Admin')
+@role_required('Admin', 'Caisse')
 def sale_create(request):
     # Récupérer ou créer vente en session
     sale_id = request.session.get('sale_id')
@@ -220,7 +226,7 @@ def sale_create(request):
 
 
 @login_required
-@role_required('Admin')
+@role_required('Admin', 'Caisse')
 def sale_finalize(request):
     sale_id = request.session.get('sale_id')
 
@@ -289,7 +295,7 @@ def sale_delete(request, pk):
 
 
 @login_required
-@role_required('Admin')
+@role_required('Admin', 'Caisse')
 def saleitem_delete(request, pk):
     # Récupérer l'item
     item = get_object_or_404(SaleItem, id=pk)
@@ -308,7 +314,7 @@ def saleitem_delete(request, pk):
 
 
 @login_required
-@role_required('Admin')
+@role_required('Admin', 'Caisse')
 def sale_detail(request, pk):
     sale = get_object_or_404(Sale, pk=pk)
     items = sale.items.all()
@@ -320,6 +326,8 @@ def sale_detail(request, pk):
     }
     return render(request, 'sale_detail.html', context)
 
+@login_required
+@role_required('Admin', 'Caisse')
 def sale_invoice_pos(request, pk):
     sale = get_object_or_404(
         Sale,
@@ -333,4 +341,4 @@ def sale_invoice_pos(request, pk):
         'sale':sale,
         'shop':shop,
     }
-    return render(request,'sale_invoice_pos_caisse.html', context)
+    return render(request,'sale_invoice_pos.html', context)

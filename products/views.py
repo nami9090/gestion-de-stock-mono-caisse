@@ -9,7 +9,7 @@ from .forms import ProductForm, CategoryForm
 
 # Create your views here.
 @login_required
-@role_required('Admin')
+@role_required('Admin','Caisse')
 def product_list(request):
     products = Product.objects.all().order_by('-created_at')
     shop = ShopSettings.objects.first()
