@@ -7,72 +7,137 @@
 <!-- Begin Page Content -->
 <div class="container-fluid">
     <!-- Page Heading -->
-    <div class="card mb-4 shadow-lg">
-        <div class="card-header m-0 font-weight-bold text-primary">
-            Détail Vente #{{ sale.id }}
-        </div>
-    </div>
-    <div class="card shadow">
-        <div class="card-header">
-            <p>Date : {{ sale.created_at|date:"d/m/Y H:i" }}</p>
-            <p>Utilisateur : {{ sale.user.username }}</p>
-            <p>Status : 
-                {% if sale.status == 'completed' %}
-                    <span class="badge bg-success">Finalisée</span>
-                {% else %}
-                    <span class="badge bg-warning">En cours</span>
-                {% endif %}
-            </p>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered">
-                    <thead class="table-primary">
-                        <tr>
-                            <th>Produit</th>
-                            <th>Quantité</th>
-                            <th>Prix unitaire</th>
-                            <th>Total</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in sale.items.all %}
-                        <tr>
-                            <td>{{ item.product.name }}</td>
-                            <td>{{ item.quantity }}</td>
-                            <td>{{ item.selling_price|intcomma }} {{ shop.currency }}</td>
-                            <td>{{ item.total_price|intcomma }} {{ shop.currency }}</td>
-                            <td>
-                                {% if sale.status != 'completed' %}
-                                <a href="{% url 'saleitem_delete' item.id %}" class="btn btn-sm btn-danger">
-                                    Supprimer <i class="bi bi-x-square"></i>
-                                </a>
-                                {% else %}
-                                <span class="text-muted">—</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <div class="row">
+        <div class="card mb-4 shadow-lg">
+            <div class="card-header m-0 font-weight-bold text-primary">
+                Détail Vente #{{ sale.id }}
             </div>
         </div>
-        <div class="card-footer">
-            <p class="fw-bold">Montant total : {{ sale.total_amount|intcomma }} {{ shop.currency }}</p>
-            <p class="fw-bold">Profit : {{ sale.total_profit|intcomma }} {{ shop.currency }}</p>
-            <!-- Bouton facture -->
-            {% if sale.status == 'completed' %}
-            <a target="_blank" href="{% url 'sale:sale_invoice' sale.id %}" class="btn btn-primary btn-sm">
-                Télécharger Facture PDF <i class="bi bi-printer"></i>
-            </a>
-            <a target="_blank" href="{% url 'sale:sale_invoice_pos' sale.id %}" class="btn btn-primary btn-sm">
-                Télécharger Facture PDF POS <i class="bi bi-printer"></i>
-            </a>
-            {% endif %}
+        <div class="card shadow">
+            <div class="card-header">
+                <p>Date : {{ sale.created_at|date:"d/m/Y H:i" }}</p>
+                <p>Utilisateur : {{ sale.user.username }}</p>
+                <p>Status : 
+                    {% if sale.status == 'completed' %}
+                        <span class="badge bg-success">Finalisée</span>
+                    {% else %}
+                        <span class="badge bg-warning">En cours</span>
+                    {% endif %}
+                </p>
+                {% if sale.status != 'completed' %}
+                <div class="mb-3">
+                    <a href="{% url 'sale:add_sale_item' sale.id %}"
+                       class="btn btn-outline-success btn-sm">
+                        Ajouter produit
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Produit</th>
+                                <th>Quantité</th>
+                                <th>Prix unitaire</th>
+                                <th>Total</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in sale.items.all %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.selling_price|intcomma }} {{ shop.currency }}</td>
+                                <td>{{ item.total_price|intcomma }} {{ shop.currency }}</td>
+                                <td>
+                                    {% if sale.status != 'completed' %}
+                                    <a href="{% url 'sale:saleitem_delete' item.id %}" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-trash3"></i>
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <p class="fw-bold">Montant total : {{ sale.total_amount|intcomma }} {{ shop.currency }}</p>
+                <p class="fw-bold">Profit : {{ sale.total_profit|intcomma }} {{ shop.currency }}</p>
+                <!-- Bouton facture -->
+                {% if sale.status == 'completed' %}
+                <a target="_blank" href="{% url 'sale:sale_invoice' sale.id %}" class="btn btn-primary btn-sm">
+                    print PDF <i class="bi bi-printer"></i>
+                </a>
+                <a target="_blank" href="{% url 'sale:sale_invoice_pos' sale.id %}" class="btn btn-primary btn-sm">
+                    print POS <i class="bi bi-printer"></i>
+                </a>
+                {% endif %}
 
-            <a href="{% url 'sale:sale_list' %}" class="btn btn-secondary btn-sm">Retour à la liste <i class="bi bi-arrow-left-square"></i></a>
+                <a href="{% url 'sale:sale_list' %}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left-square"></i></a>
+            </div>
         </div>
+    </div>
+    <br>
+    <div class="row">
+    {% if sale.is_restaurant_order %}
+        <div class="alert alert-info">
+            <div class="row">
+                <div class="col-md-3">
+                    <strong>Table :</strong>
+                    {{ sale.restaurant_table.name }}
+                </div>
+                <div class="col-md-3">
+                    <strong>Commande :</strong>
+                    {% if sale.order_status == 'pending' %}
+                        <span class="badge bg-warning">
+                            En attente
+                        </span>
+                    {% elif sale.order_status == 'preparing' %}
+                        <span class="badge bg-info">
+                            En préparation
+                        </span>
+                    {% elif sale.order_status == 'served' %}
+                        <span class="badge bg-primary">
+                            Servi
+                        </span>
+                    {% elif sale.order_status == 'paid' %}
+                        <span class="badge bg-success">
+                            Payé
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
+                    <strong>Serveur :</strong>
+                    {{ sale.user.username }}
+                </div>
+                <div class="col-md-3">
+                    {% if sale.order_status == 'pending' %}
+                    <a href="{% url 'sale:update_order_status' sale.id 'preparing' %}"
+                       class="btn btn-sm btn-warning">
+                        Préparer
+                    </a>
+                    {% elif sale.order_status == 'preparing' %}
+                    <a href="{% url 'sale:update_order_status' sale.id 'served' %}"
+                       class="btn btn-sm btn-primary">
+                        Servir
+                    </a>
+                    {% elif sale.order_status == 'served' %}
+                    <a href="{% url 'sale:update_order_status' sale.id 'paid' %}"
+                       class="btn btn-sm btn-success">
+                        Paiement
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
     </div>
 </div>
 <!-- /.container-fluid -->

@@ -19,14 +19,16 @@ class Product(models.Model):
         blank=True,
         related_name="products"
     )
+    # CATEGORY_CHOICES = [
+    #     ("restaurant", "Restaurant"),
+    #     ("bar", "Bar"),
+    #     ("boutique", "Boutique"),
+    # ]
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
     selling_price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField(default=0)
     minimum_stock = models.IntegerField(default=5)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
 
     @property
     def profit_margin(self):
@@ -42,3 +44,5 @@ class Product(models.Model):
     def stock_value(self):
         return self.stock * self.purchase_price
     
+    def __str__(self):
+        return self.name

@@ -14,4 +14,14 @@ urlpatterns = [
 	path('detail-vente/<int:pk>/', views.sale_detail, name='sale_detail'),
 	path('vente/<int:pk>/facture/', views.sale_invoice, name='sale_invoice'),
     path('facture-pos/<int:pk>/', views.sale_invoice_pos, name='sale_invoice_pos'),
+
+    path('rapport-vente/', views.closing_report_view, name='closing_report_view'),
+    path("closing-pdf/", views.download_closing_pdf, name="download_closing_pdf"),
+
+    path('restaurant/create/<int:table_id>/', views.create_restaurant_sale, name='create_restaurant_sale'),
+
+    path('restaurant/status/<int:sale_id>/<str:status>/', views.update_order_status,name='update_order_status'),
+
+    path('<int:sale_id>/add-item/', views.add_sale_item,name='add_sale_item'),
+
 ]

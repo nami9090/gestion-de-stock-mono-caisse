@@ -7,7 +7,15 @@ from django.contrib import messages
 from .models import Sale, SaleItem
 from .forms import SaleForm, SaleItemForm
 
+from products.models import Product
+from customers.models import Customer
+
 from core.models import ShopSettings
+from .sale_report import closing_report
+
+from restaurent.models import RestaurantTable
+
+from .pdf_closing import generate_closing_pdf
 
 ### Facture avec ReportLab
 from reportlab.platypus import (
@@ -53,7 +61,6 @@ def sale_invoice(request, pk):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     elements = []
-
     styles = getSampleStyleSheet()
 
     right_style = ParagraphStyle(
@@ -104,13 +111,13 @@ def sale_invoice(request, pk):
     total_general = Decimal("0.00")
 
     for item in sale.items.all():
-        total = item.quantity * item.purchase_price
+        total = item.quantity * item.selling_price
         total_general += total
 
         data.append([
             item.product.name,
             str(item.quantity),
-            f"{item.purchase_price:,.0f} {shop.currency}",
+            f"{item.selling_price:,.0f} {shop.currency}",
             f"{total:,.0f} {shop.currency}",
         ])
 
@@ -174,56 +181,86 @@ def generate_invoice(request, pk):
 @login_required
 @role_required('Admin', 'Caisse')
 def sale_create(request):
-    # Récupérer ou créer vente en session
-    sale_id = request.session.get('sale_id')
+    #récupérer boutique
     shop = ShopSettings.objects.first()
+
+    #récupérer vente en session
+    sale_id = request.session.get('sale_id')
+
     if sale_id:
         try:
             sale = Sale.objects.get(id=sale_id)
         except Sale.DoesNotExist:
-            sale = Sale.objects.create(user=request.user)
+            sale = Sale.objects.create(
+                user=request.user
+            )
             request.session['sale_id'] = sale.id
     else:
-        sale = Sale.objects.create(user=request.user)
+        sale = Sale.objects.create(
+            user=request.user
+        )
         request.session['sale_id'] = sale.id
 
+    #charger clients
+    customers = Customer.objects.all()
     sale_form = SaleForm(instance=sale)
     form = SaleItemForm()
 
-    # Ajouter un produit
-    if request.method == "POST":
-        sale_form = SaleForm(request.POST, instance=sale)
-        if sale_form.is_valid():
-            sale_form.save()
+    # ===================================
+    # AJOUT PRODUIT
+    # ===================================
 
+    if request.method == "POST":
+
+        #CLIENT
+        customer_id = request.POST.get('customer')
+        if customer_id:
+            try:
+                customer = Customer.objects.get(id=customer_id)
+                sale.customer = customer
+            except Customer.DoesNotExist:
+                pass
+
+        #sauvegarder vente
+        sale_form = SaleForm(
+            request.POST,
+            instance=sale
+        )
+        if sale_form.is_valid():
+            sale = sale_form.save(commit=False)
+            # garder client sélectionné
+            if customer_id:
+                sale.customer = customer
+            sale.save()
+
+        #formulaire produit
         form = SaleItemForm(request.POST)
         if form.is_valid():
             item = form.save(commit=False)
             item.sale = sale
 
-            # remplir automatiquement les prix
+            # prix automatiques
             item.selling_price = item.product.selling_price
             item.purchase_price = item.product.purchase_price
 
-            # Vérification stock
+            #vérification stock
             if item.quantity > item.product.stock:
-                messages.warning(request, "Stock insuffisant.")
+                messages.warning(request,"Stock insuffisant.")
             else:
                 item.save()
-                messages.success(request, "Produit ajouté à la vente.")
+                messages.success(request,"Produit ajouté à la vente.")
                 return redirect('sale:sale_create')
 
     items = sale.items.all()
-
     context = {
         'sale': sale,
         'items': items,
-        'sale_form':sale_form,
+        'sale_form': sale_form,
         'form': form,
-        'shop':shop
+        'shop': shop,
+        'customers': customers,
     }
-    return render(request, 'sale_create.html', context)
-
+    return render(request, 'sale_create.html',context)
 
 @login_required
 @role_required('Admin', 'Caisse')
@@ -342,3 +379,140 @@ def sale_invoice_pos(request, pk):
         'shop':shop,
     }
     return render(request,'sale_invoice_pos.html', context)
+
+@login_required
+@role_required('Admin','Caisse')
+def closing_report_view(request):
+    report = closing_report(request.user)
+    shop = ShopSettings.objects.first()
+    context = {
+        "report": report,
+        "shop":shop
+    }
+    return render(request, "closing_report.html", context)
+
+@login_required
+@role_required('Admin','Caisse')
+def download_closing_pdf(request):
+    pdf = generate_closing_pdf(user=request.user)
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="closing_report.pdf"'
+
+    return response
+
+@login_required
+@role_required('Admin','Caisse')
+def create_restaurant_sale(request, table_id):
+    table = get_object_or_404(RestaurantTable, id=table_id)
+
+    # Vérifier si une commande existe déjà
+    existing_sale = Sale.objects.filter(
+        restaurant_table=table,
+        status='draft'
+    ).first()
+
+    if existing_sale:
+        return redirect('sale:sale_detail', existing_sale.id)
+
+    # Client automatique
+    customer = table.customer
+
+    # Créer nouvelle commande
+    sale = Sale.objects.create(
+        user=request.user,
+        status='draft',
+        is_restaurant_order=True,
+        restaurant_table=table,
+        # Liaison avec client
+        customer = customer,
+
+        customer_name=customer.full_name
+        if customer else f"Table {table.name}",
+
+        customer_phone = customer.phone
+        if customer else "",
+
+        order_status='pending'
+    )
+    # OCCUPER LA TABLE
+    table.status = 'occupied'
+    table.save()
+
+    return redirect('sale:sale_detail', sale.id)
+
+@login_required
+@role_required('Admin','Caisse')
+def update_order_status(request, sale_id, status):
+    sale = get_object_or_404(Sale, id=sale_id)
+    sale.order_status = status
+    # si payé → vente finalisée
+    if status == 'paid':
+        sale.status = 'completed'
+
+        # libérer table
+        if sale.restaurant_table:
+            sale.restaurant_table.status = 'free'
+            sale.restaurant_table.save()
+
+    sale.save()
+
+    return redirect('sale:sale_detail', sale.id)
+
+
+
+@login_required
+@role_required('Admin','Caisse')
+def add_sale_item(request, sale_id):
+    sale = get_object_or_404(Sale, id=sale_id)
+
+    # empêcher modification si finalisée
+    if sale.status == 'completed':
+
+        messages.error(
+            request,
+            "Impossible de modifier une vente finalisée."
+        )
+
+        return redirect('sale:sale_detail', sale.id)
+
+    products = Product.objects.filter(stock__gt=0)
+
+    if request.method == 'POST':
+
+        product_id = request.POST.get('product')
+        quantity = int(request.POST.get('quantity', 1))
+
+        product = get_object_or_404(Product, id=product_id)
+
+        # Vérifier stock
+        if quantity > product.stock:
+
+            messages.error(
+                request,
+                f"Stock insuffisant pour {product.name}"
+            )
+
+            return redirect('sale:add_sale_item', sale.id)
+
+        # Créer item
+        SaleItem.objects.create(
+            sale=sale,
+            product=product,
+            quantity=quantity,
+
+            selling_price=product.selling_price,
+            purchase_price=product.purchase_price,
+        )
+
+        messages.success(
+            request,
+            f"{product.name} ajouté à la commande."
+        )
+
+        return redirect('sale:sale_detail', sale.id)
+    context = {
+        'sale': sale,
+        'products': products,
+    }
+    return render(request, 'add_sale_item.html', context)

@@ -1,48 +1,101 @@
 {% extends 'base.html' %}
+
 {% block title %}
   Vente | Ajouter | Admin
 {% endblock %}
+
 {% block content %}
 {% load humanize %}
+
 <div class="container-fluid">
-    <div class='row'>
-        <div class='col-md-4'>
-            <div class="card mb-4 shadow-lg">
-            <div class="card-header m-0 font-weight-bold text-primary">
-                Formulaire vente
-            </div>
-            <div class="card shadow mb-3">
-                <div class="card-header">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        Nouvelle vente
-                    </h6>
+    <div class="row">
+        <!-- FORMULAIRE -->
+        <div class="col-md-4">
+            <!-- INFOS VENTE -->
+            <div class="card mb-3 shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        Informations vente
+                    </h5>
                 </div>
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
                 <div class="card-body">
+                    <!-- CLIENT -->
                     <form method="POST">
                         {% csrf_token %}
-                        {{ form.as_p }}
-                        {{ sale_form.as_p }}
-                        <button type="submit" class="btn btn-success btn-sm">
-                            Ajouter <i class="bi bi-plus-square"></i>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                Client
+                            </label>
+                            <select name="customer"
+                                    class="form-select">
+                                <option value="">
+                                    Client occasionnel
+                                </option>
+                                {% for customer in customers %}
+                                <option value="{{ customer.id }}"
+                                    {% if sale.customer == customer %}
+                                        selected
+                                    {% endif %}>
+                                    {{ customer.full_name }}
+                                    -
+                                    {{ customer.phone }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- RESTAURANT -->
+                        {% if sale.is_restaurant_order %}
+                        <div class="alert alert-info">
+                            <strong>Table :</strong>
+                            {{ sale.restaurant_table.name }}
+                            <br>
+                            <strong>Serveur :</strong>
+                            {{ sale.user.username }}
+                        </div>
+                        {% endif %}
+                        <!-- FORM PRODUIT -->
+                        <div class="mb-3">
+                            {{ form.as_p }}
+                        </div>
+                        <!-- INFOS VENTE -->
+                        <div class="mb-3">
+                            {{ sale_form.as_p }}
+                        </div>
+                        <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                            Ajouter produit
+                            <i class="bi bi-plus-square"></i>
                         </button>
                     </form>
                 </div>
             </div>
-            </div>
+
+            <!-- MESSAGES -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} shadow-sm">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
         </div>
-        <div class='col-md-8'>
-            <div class="card shadow">
+
+        <!-- DETAIL COMMANDE -->
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Détail commande</h5>
+                        {% if sale.customer %}
+                        <span class="badge bg-primary">
+                            {{ sale.customer.full_name }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered">
-                            <thead class="table-primary">
+                        <table class="table table-hover table-sm">
+                            <thead>
                                 <tr>
                                     <th>Produit</th>
                                     <th>Qté</th>
@@ -56,38 +109,64 @@
                                 <tr>
                                     <td>{{ item.product.name }}</td>
                                     <td>{{ item.quantity }}</td>
-                                    <td>{{ item.selling_price|intcomma }} {{ shop.currency }}</td>
-                                    <td>{{ item.total_price|intcomma }} {{ shop.currency }}</td>
+                                    <td>{{ item.selling_price|intcomma }}{{ shop.currency }}</td>
+                                    <td>{{ item.total_price|intcomma }}{{ shop.currency }}</td>
                                     <td>
-                                        <a class="btn btn-danger btn-sm" href="{%  url 'sale:saleitem_delete' item.id %}">Supprimer <i class="bi bi-x-square"></i></a>
+                                        <a class="btn btn-danger btn-sm" href="{% url 'sale:saleitem_delete' item.id %}">
+                                            <i class="bi bi-trash3"></i>
+                                        </a>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="5" class="text-center">Aucun produit ajouté</td>
+                                    <td colspan="5" class="text-center text-muted">
+                                        Aucun produit ajouté
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
-                        <hr>
-                        <h5>
-                            <span class="fw-bold">Total :</span>
-                            <span class="text-primary">{{ sale.total_amount|intcomma }} {{ shop.currency }}</span>
-                        </h5>
-                        <h6>
-                            <span class="fw-bold" >Profit :</span>
-                            <span class="text-success">{{ sale.total_profit|intcomma }} {{ shop.currency }}</span>
-                        </h6>
+                    </div>
+                    <hr>
+                    <!-- TOTAL -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>
+                                <span class="fw-bold">Total :</span>
+                                <span class="text-primary">
+                                    {{ sale.total_amount|intcomma }}
+                                    {{ shop.currency }}
+                                </span>
+                            </h5>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <h6>
+                                <span class="fw-bold">Profit :</span>
+                                <span class="text-success">
+                                    {{ sale.total_profit|intcomma }}{{ shop.currency }}
+                                </span>
+                            </h6>
+                        </div>
+                    </div>
+                    <hr>
+                    <!-- ACTIONS -->
+                    <div class="d-flex gap-2">
+
                         {% if items %}
-                            <a href="{% url 'sale:sale_finalize' %}" class="btn btn-primary btn-sm">
-                                Finaliser la vente <i class="bi bi-check-square"></i>
-                            </a>
+                        <a href="{% url 'sale:sale_finalize' %}" class="btn btn-outline-primary btn-sm">
+                            Finaliser la vente
+                            <i class="bi bi-check-square"></i>
+                        </a>
                         {% endif %}
-                        <a href="{% url 'sale:sale_list' %}" class="btn btn-secondary btn-secondary btn-sm">Retour <i class="bi bi-arrow-left-square"></i></a>
+                        <a href="{% url 'sale:sale_list' %}" class="btn btn-outline-secondary btn-sm">
+                            Retour
+                            <i class="bi bi-arrow-left-square"></i>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}

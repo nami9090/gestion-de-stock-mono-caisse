@@ -119,6 +119,24 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
             {% endif %}
             {% if group.name == 'Admin' or group.name == 'Caisse' %}
             <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseClient"
+                    aria-expanded="true" aria-controls="collapseClient">
+                        <i class="bi bi-ticket-perforated"></i>
+                        <span>Gestion des clients</span>
+                    </a>
+                    <div id="collapseClient" class="collapse" aria-labelledby="headingClient"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Gestion des clients</h6>
+                        <a class="collapse-item" href="{% url 'customer:customer_list' %}">
+                        <span class="text-primary">Gestion des clients</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
+            {% endif %}
+            {% if group.name == 'Admin' or group.name == 'Caisse' %}
+            <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReclamation"
                     aria-expanded="true" aria-controls="collapseReclamation">
                     <i class="bi bi-file-earmark-break"></i>
@@ -129,7 +147,10 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Gestion des ventes</h6>
                         <a class="collapse-item" href="{% url 'sale:sale_list' %}">
-                        <span class="text-primary">Gestion des ventes</span>
+                            <span class="text-primary">Gestion des ventes</span>
+                        </a>
+                        <a class="collapse-item" href="{% url 'sale:closing_report_view' %}">
+                            <span class="text-primary">Rapport vente</span>
                         </a>
                     </div>
                 </div>
@@ -148,6 +169,24 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                         <h6 class="collapse-header">Gestion des utilisateurs</h6>
                         <a class="collapse-item" href="{% url 'user:gestion_utilisateur' %}">
                         <span class="text-primary">Gestion des utilisateurs</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
+            {% endif %}
+            {% if group.name == 'Admin' or group.name == 'Caisse' %}
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle='collapse' data-target='#collapseRestarent' 
+                    aria-expanded='true' aria-controls='collapseRestarent' >
+                    <i class="bi bi-file-earmark-break"></i>
+                    <span>Gestion Restaurent</span>
+                </a>
+                <div id="collapseRestarent" class="collapse" aria-labelledby="headingRestaurent"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Gestion Restaurent</h6>
+                        <a class="collapse-item" href="{% url 'restaurant:table_list' %}">
+                        <span class="text-primary">Gestion Restaurent</span>
                         </a>
                     </div>
                 </div>

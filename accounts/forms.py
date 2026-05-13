@@ -24,7 +24,6 @@ class UserCreateForm(forms.ModelForm):
             'username': forms.TextInput(attrs={'class':'form-control'}),
             'email': forms.EmailInput(attrs={'class':'form-control'}),
             'password': forms.PasswordInput(attrs={'class':'form-control'}),
-            'is_active': forms.CheckboxInput(attrs={'class':'form-check-input'}),
         }
 
     def clean(self):

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}
+    Closing report
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<div class="container-fluid">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            Rapport de clôture - {{ report.date }}
+            {% if report.is_admin_view %}
+                <div class="alert alert-danger">
+                    ADMINISTRATEUR : Vue globale de toutes les caisses
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    Vue caisse (vos ventes uniquement)
+                </div>
+            {% endif %}
+            <br><br>
+            <a href="{% url 'sale:download_closing_pdf' %}" class="btn btn-outline-success btn-sm">Telecharger PDF</a>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <h6>Total ventes</h6>
+                            <span class="badge badge-primary">
+                                {{ report.total_sales }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <h6>Chiffre d'affaires</h6>
+                            <span class="badge bg-warning">
+                                {{ report.total_amount|intcomma }} {{ shop.currency }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                           <h6>Bénéfice</h6>
+                            <span class="badge badge-success">
+                                {{ report.total_profit|intcomma }} {{ shop.currency }}
+                            </span> 
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            <hr>
+            <h4>Détails des ventes</h4>
+            <div class="table-responsive">
+               <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Client</th>
+                            <th>Total</th>
+                            <th>Bénéfice</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in report.sales %}
+                        <tr>
+                            <td>{{ sale.id }}</td>
+                            <td>{{ sale.customer_name }}</td>
+                            <td>{{ sale.total_amount|intcomma }} {{ shop.currency }}</td>
+                            <td>{{ sale.total_profit|intcomma }} {{ shop.currency }}</td>
+                            <td>{{ sale.created_at }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table> 
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

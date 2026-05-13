@@ -30,8 +30,8 @@
                 <div class="input-group">
                    <input type="text" id="searchInput" class="form-control mb-2" placeholder="Rechercher ici...">
                 </div>
-                <table class="table table-sm table-bordered" id="dataTable">
-                    <thead class="table-primary">
+                <table class="table table-sm table-hover" id="dataTable">
+                    <thead>
                         <tr>
                             <th>Nom</th>
                             <th>Catégorie</th>
@@ -85,9 +85,9 @@
                             </td>
                             {% if group.name == 'Admin' %}
                             <td>
-                                <a href="{% url 'products:product_detail' product.id %}" class="btn btn-sm btn-info btn-sm">Voir</a>
-                                <a href="{% url 'products:product_update' product.id %}" class="btn btn-sm btn-warning btn-sm">Modifier</a>
-                                <a href="{% url 'products:product_delete' product.id %}" class="btn btn-sm btn-danger btn-sm">Supprimer</a>
+                                <a href="{% url 'products:product_detail' product.id %}" class="btn btn-sm btn-sm"><i class="bi bi-card-list"></i></a>
+                                <a href="{% url 'products:product_update' product.id %}" class="btn btn-sm btn-sm"><i class="bi bi-pencil"></i></a>
+                                <a href="{% url 'products:product_delete' product.id %}" class="btn btn-sm btn-sm"><i class="bi bi-trash3"></i></a>
                             </td>
                             {% endif %}
                         </tr>

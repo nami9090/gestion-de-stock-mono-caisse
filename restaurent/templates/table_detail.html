@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}
+  Table | {% if user.is_authenticated %}{{ user.username }}{% endif %}
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center">
+        <h5>{{ table.name }}</h5>
+        <p>
+            <strong>Client :</strong>
+            {% if table.customer %}
+                {{ table.customer.full_name }}
+                -
+                {{ table.customer.phone }}
+            {% else %}
+                Aucun client assigné
+            {% endif %}
+        </p>
+        {% if table.status == 'free' %}
+        <a href="{% url 'restaurant:open_table' table.pk %}"
+           class="btn btn-outline-success btn-sm">
+            Ouvrir la table
+        </a>
+        {% else %}
+        <a href="{% url 'restaurant:close_table' table.pk %}"
+           class="btn btn-outline-danger btn-sm">
+            Libérer la table
+        </a>
+        {% endif %}
+    </div>
+    <a href="{% url 'sale:create_restaurant_sale' table.id %}"
+       class="btn btn-outline-primary btn-sm">
+        Nouvelle commande
+    </a>
+    <hr>
+    <div class="card shadow border-0 rounded-4">
+        <div class="card-body">
+            <h4>Commandes en cours</h4>
+            <table class="table table-sm table-bordered mt-3">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Client</th>
+                        <th>Total</th>
+                        <th>Statut</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    <tr>
+                        <td>{{ sale.id }}</td>
+                        <td>{{ sale.customer_name }}</td>
+                        <td>{{ sale.total_amount }}</td>
+                        <td>
+                            {{ sale.get_order_status_display }}
+                        </td>
+                        <td>
+                            <!-- SUPPRIMER -->
+                                {% if sale.status != 'completed' %}
+
+                                <a href="{% url 'restaurant:delete_sale' sale.id %}"
+                                   class="btn btn-outline-danger btn-sm">
+
+                                    Retirer
+
+                                </a>
+
+                                {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">
+                            Aucune commande
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

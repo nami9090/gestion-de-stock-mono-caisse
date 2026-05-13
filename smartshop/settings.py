@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     'sales',
     'dashboard',
     'core',
+    'restaurent',
+    'customers',
     'bootstrap5',
 ]
 

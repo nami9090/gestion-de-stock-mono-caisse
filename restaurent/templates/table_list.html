@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Table | {% if user.is_authenticated %}{{ user.username }}{% endif %}
+{% endblock %}
+
+{% block content %}
+{% load humanize %}
+
+<div class="container-fluid">
+     {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% for group in request.user.groups.all %}
+    <div class="card shadow-lg border-0">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                Gestion des tables
+            </h5>
+            {% if group.name == 'Admin' %}
+            <a href="{% url 'restaurant:table_create' %}"
+               class="btn btn-outline-success btn-sm">
+                Ajouter une table
+            </a>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for table in tables %}
+                <div class="col-md-3 mb-4">
+                    <div class="card shadow border-0 rounded-4 h-100">
+                        <div class="card-body text-center">
+                            <!-- NOM TABLE -->
+                            <h4>
+                                {{ table.name }}
+                            </h4>
+                            <!-- CAPACITE -->
+                            <p>
+                                Capacité :
+                                {{ table.capacity }}
+
+                            </p>
+                            {% if table.customer %}
+                            <p class="text-primary fw-bold">
+                                {{ table.customer.full_name }}
+                            </p>
+                            {% endif %}
+                            <!-- STATUS -->
+                            {% if table.status == 'free' %}
+                                <span class="badge bg-success">
+                                    Libre
+                                </span>
+                            {% elif table.status == 'occupied' %}
+                                <span class="badge bg-danger">
+                                    Occupée
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">
+                                    Réservée
+                                </span>
+                            {% endif %}
+                            <hr>
+                            <!-- ACTIONS -->
+                            <div class="d-grid gap-2">
+                                <!-- DETAIL -->
+                                <a href="{% url 'restaurant:table_detail' table.pk %}"
+                                   class="btn btn-outline-primary btn-sm">
+                                    Voir
+                                </a>
+                                {% if group.name == 'Admin' %}
+                                <!-- MODIFIER -->
+                                <a href="{% url 'restaurant:table_update' table.pk %}"
+                                   class="btn btn-outline-warning btn-sm">
+                                    Modifier
+                                </a>
+                                <!-- SUPPRIMER -->
+                                <a href="{% url 'restaurant:table_delete' table.pk %}"
+                                   class="btn btn-outline-danger btn-sm">
+                                    Supprimer
+                                </a>
+                                {% endif %}
+                                <!-- COMMANDE -->
+                                {% if table.status == 'free' %}
+                                <a href="{% url 'sale:create_restaurant_sale' table.pk %}"
+                                   class="btn btn-success btn-sm">
+                                    Nouvelle commande
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        Aucune table enregistrée.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

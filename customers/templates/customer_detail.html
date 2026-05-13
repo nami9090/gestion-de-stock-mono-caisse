@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}
+ Detail du client
+{% endblock %}
+{% load humanize %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="card shadow">
+        <div class="card-header">
+            <h4>
+                {{ customer.full_name }}
+            </h4>
+        </div>
+        <div class="card-body">
+            <p>
+                <strong>Téléphone :</strong>
+                {{ customer.phone }}
+            </p>
+            <p>
+                <strong>Email :</strong>
+                {{ customer.email }}
+            </p>
+            <p>
+                <strong>Adresse :</strong>
+                {{ customer.address }}
+            </p>
+            <hr>
+            <h5>
+                Historique achats
+            </h5>
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr>
+                        <th>Vente</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    <tr>
+                        <td>
+                            #{{ sale.id }}
+                        </td>
+                        <td>
+                            {{ sale.total_amount|intcomma }} {{ shop.currency }}
+                        </td>
+                        <td>
+                            {{ sale.created_at|date:"d/m/Y H:i" }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">
+                            Aucun achat
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <hr>
+            <h5>
+                Total dépensé :
+                {{ total_spent|intcomma }} {{ shop.currency }}
+            </h5>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'customer:customer_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left-square"></i> Retour</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}s

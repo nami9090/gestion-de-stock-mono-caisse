@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-body text-center">
+            <h4>
+                Vouslez-vous supprimer le client
+                {{ customer.full_name }} ?
+            </h4>
+            <form method="POST">
+                {% csrf_token %}
+                <button class="btn btn-outline-danger btn-sm">
+                    Supprimer
+                </button>
+                <a href="{% url 'customer:customer_list' %}"
+                   class="btn btn-outline-secondary btn-sm">
+                    Annuler
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

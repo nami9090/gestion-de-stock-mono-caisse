@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}
+    Liste des clients
+{% endblock %}
+{% load humanize %}
+{% block content %}
+<div class="container-fluid">
+    {% for group in request.user.groups.all %}
+    <div class="card shadow">
+        <div class="card-header d-flex justify-content-between">
+            <h5>Listes de clients</h5>
+            <a href="{% url 'customer:customer_create' %}"
+               class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-square"></i> Ajouter client
+            </a>
+        </div>
+        <div class="card-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <form method="GET"
+                  class="mb-3">
+                <input type="text" name="q" class="form-control" placeholder="Recherche client...">
+            </form>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Téléphone</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customers %}
+                        <tr>
+                            <td>
+                                {{ customer.full_name }}
+                            </td>
+                            <td>
+                                {{ customer.phone }}
+                            </td>
+                            <td>
+                                {{ customer.email }}
+                            </td>
+                            <td>
+                                <a href="{% url 'customer:customer_detail' customer.id %}"
+                                   class="btn btn-info btn-sm">
+                                   <i class="bi bi-layout-text-sidebar-reverse"></i>
+                                </a>
+                                {% if group.name == 'Admin' %}
+                                <a href="{% url 'customer:customer_update' customer.id %}"
+                                   class="btn btn-warning btn-sm">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'customer:customer_delete' customer.id %}"
+                                   class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4"
+                                class="text-center">
+                                Aucun client
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

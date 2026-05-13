@@ -25,6 +25,8 @@ urlpatterns = [
     path('product/', include('products.urls')),
     path('stock/',include('stock.urls')),
     path('sale/',include('sales.urls')),
+    path('restaurant/', include('restaurent.urls')),
+    path('customer/', include('customers.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('smartstock-admin/', include('core.urls')),
 ]

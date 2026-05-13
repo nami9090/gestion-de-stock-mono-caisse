@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow">
+        <div class="card-body text-center">
+            <h4>
+                Supprimer
+                {{ table.name }} ?
+
+            </h4>
+            <form method="POST">
+                {% csrf_token %}
+                <button class="btn btn-outline-danger btn-sm">Supprimer</button>
+                <a href="{% url 'restaurant:table_list' %}"
+                   class="btn btn-outline-secondary btn-sm">
+                    Annuler
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

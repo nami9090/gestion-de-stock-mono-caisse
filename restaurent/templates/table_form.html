@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}
+    Creation du table
+{% endblock %}
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card shadow border-0 rounded-4">
+        <div class="card-header">
+            <h5>
+                {% if table %}
+                    Modifier table
+                {% else %}
+                    Nouvelle table
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-outline-primary btn-sm">
+                    Enregistrer
+                </button>
+            </form>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'restaurant:table_list' %}" class="btn btn-outline-secondary btn-sm">Retour</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -3,6 +3,8 @@ from django.contrib.auth.models import User, Group
 from decimal import Decimal
 
 from products.models import Product
+from restaurent.models import RestaurantTable
+from customers.models import Customer
 
 # Create your models here.
 class Sale(models.Model):
@@ -23,8 +25,24 @@ class Sale(models.Model):
 
     customer_name = models.CharField(max_length=80, blank=True, null=True)
     customer_phone = models.CharField(max_length=20, blank=True, null=True)
+
+    customer = models.ForeignKey(Customer,on_delete=models.SET_NULL,null=True,blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
+
+    #Lien restaurent
+
+    ORDER_STATUS = [
+        ("pending", "En attente"),
+        ("preparing", "En préparation"),
+        ("served", "Servi"),
+        ("paid", "Payé"),
+    ]
+    is_restaurant_order = models.BooleanField(default=False)
+
+    restaurant_table = models.ForeignKey(RestaurantTable,on_delete=models.SET_NULL,null=True,blank=True)
+
+    order_status = models.CharField(max_length=20,choices=ORDER_STATUS,default="pending")
     
     def __str__(self):
         return f"Vente #{self.id}"
@@ -79,3 +97,13 @@ class SaleItem(models.Model):
 
     def __str__(self):
         return str(self.product)
+
+class CashClosing(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField(auto_now_add=True)
+
+    total_sales = models.IntegerField()
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    total_profit = models.DecimalField(max_digits=12, decimal_places=2)
+
+    created_at = models.DateTimeField(auto_now_add=True)

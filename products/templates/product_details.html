@@ -12,10 +12,10 @@
             Detail du produit
         </div>
         <div class="py-1" >
-            <a href="{% url 'product_update' product.id %}" class="btn btn-warning btn-sm">
+            <a href="{% url 'products:product_update' product.id %}" class="btn btn-warning btn-sm">
                 Modifier
             </a>
-            <a href="{% url 'product_delete' product.id %}" class="btn btn-danger btn-sm">
+            <a href="{% url 'products:product_delete' product.id %}" class="btn btn-danger btn-sm">
                 Supprimer
             </a>
         </div>
@@ -28,24 +28,18 @@
         </div>
         <div class="card-body">
             <p><strong>Catégorie :</strong> {{ product.category }}</p>
-
             <p>
-                <strong>Prix d'achat :</strong>
-                {{ product.purchase_price|intcomma }} BIF
+                <strong>Prix d'achat :</strong>{{ product.purchase_price|intcomma }} BIF
             </p>
-
             <p>
-                <strong>Prix de vente :</strong>
-                {{ product.selling_price|intcomma }} BIF
+                <strong>Prix de vente :</strong>{{ product.selling_price|intcomma }} BIF
             </p>
-
             <p>
                 <strong>Marge unitaire :</strong>
                 <span class="badge bg-info">
                     {{ product.profit_margin|intcomma }} BIF
                 </span>
             </p>
-
             <p>
                 <strong>Stock actuel :</strong>
                 {% if product.stock <= product.minimum_stock %}
@@ -58,26 +52,22 @@
                     </span>
                 {% endif %}
             </p>
-
             <p>
                 <strong>Valeur totale du stock :</strong>
                 <span class="fw-bold">
                     {{ product.stock_value|intcomma }} BIF
                 </span>
             </p>
-
             <p>
-                <strong>Stock minimum :</strong>
-                {{ product.minimum_stock }}
+                <strong>Stock minimum :</strong>{{ product.minimum_stock }}
             </p>
 
             <p>
-                <strong>Créé le :</strong>
-                {{ product.created_at|date:"Y-m-d H:i" }}
+                <strong>Créé le :</strong>{{ product.created_at|date:"Y-m-d H:i" }}
             </p>
         </div>
         <div class="card-footer">
-            <a href="{% url 'product_list' %}" class="btn btn-secondary btn-sm">
+            <a href="{% url 'products:product_list' %}" class="btn btn-secondary btn-sm">
                 Retour à la liste
             </a>
         </div>
