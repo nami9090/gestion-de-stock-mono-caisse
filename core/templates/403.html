@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}
+  403 Error
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<div class="container">
+	<div class="card shadow-lg">
+		<div class="card-header">
+			Security message
+		</div>
+		<div class="card-body">
+			<h4 class="text-center text-danger">You don't have access</h4>	
+		</div>
+	</div>
+</div>
+{% endblock %}

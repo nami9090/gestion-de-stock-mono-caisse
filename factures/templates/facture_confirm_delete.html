@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-danger text-white">
+            <h5>Supprimer la facture</h5>
+        </div>
+
+        <div class="card-body">
+
+            <p class="fs-5">
+                Êtes-vous sûr de vouloir supprimer la facture :
+            </p>
+
+            <h4 class="text-primary">
+                {{ facture.reference }}
+            </h4>
+
+            <p>
+                <strong>Client :</strong>
+                {{ facture.customer.full_name|default:"-" }} <br>
+
+                <strong>Total :</strong>
+                {{ facture.total }} <br>
+
+                <strong>Payé :</strong>
+                {{ facture.amount_paid }} <br>
+
+                <strong>Reste :</strong>
+                <span class="text-danger">{{ facture.remaining }}</span>
+            </p>
+
+            <hr>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <button type="submit" class="btn btn-danger w-100">
+                    Oui, supprimer
+                </button>
+
+                <a href="{% url 'facture:facture_list' %}" class="btn btn-secondary w-100 mt-2">
+                    Annuler
+                </a>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

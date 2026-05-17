@@ -85,9 +85,9 @@
                             </td>
                             {% if group.name == 'Admin' %}
                             <td>
-                                <a href="{% url 'products:product_detail' product.id %}" class="btn btn-sm btn-sm"><i class="bi bi-card-list"></i></a>
-                                <a href="{% url 'products:product_update' product.id %}" class="btn btn-sm btn-sm"><i class="bi bi-pencil"></i></a>
-                                <a href="{% url 'products:product_delete' product.id %}" class="btn btn-sm btn-sm"><i class="bi bi-trash3"></i></a>
+                                <a href="{% url 'products:product_detail' product.id %}" class="btn btn-primary btn-sm"><i class="bi bi-card-list"></i></a>
+                                <a href="{% url 'products:product_update' product.id %}" class="btn btn-success btn-sm"><i class="bi bi-pencil"></i></a>
+                                <a href="{% url 'products:product_delete' product.id %}" class="btn btn-danger btn-sm"><i class="bi bi-trash3"></i></a>
                             </td>
                             {% endif %}
                         </tr>

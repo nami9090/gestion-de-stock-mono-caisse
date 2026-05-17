@@ -64,6 +64,44 @@
                 Total dépensé :
                 {{ total_spent|intcomma }} {{ shop.currency }}
             </h5>
+            <hr>
+
+            <h5>📄 Factures du client</h5>
+
+            <table class="table table-sm table-bordered">
+
+                <thead>
+                    <tr>
+                        <th>Référence</th>
+                        <th>Total</th>
+                        <th>Payé</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for facture in factures %}
+                    <tr>
+                        <td>{{ facture.reference }}</td>
+                        <td>{{ facture.total|intcomma }} {{shop.currency}}</td>
+                        <td>{{ facture.amount_paid|intcomma }} {{shop.currency}}</td>
+                        <td>
+                            {% if facture.status == 'paid' %}
+                                <span class="badge bg-success">Payée</span>
+                            {% elif facture.status == 'partial' %}
+                                <span class="badge bg-warning">Partielle</span>
+                            {% elif facture.status == 'canceled' %}
+                                <span class="badge bg-secondary">Annulée</span>
+                            {% else %}
+                                <span class="badge bg-danger">Impayée</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h5 class="text-danger mt-3">
+                Total impayé : {{ total_impaye|intcomma }} {{shop.currency}}
+            </h5>
         </div>
         <div class="card-footer">
             <a href="{% url 'customer:customer_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left-square"></i> Retour</a>

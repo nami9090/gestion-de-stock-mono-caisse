@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}
+    Dashboard Serveur
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">
+                Dashboard Serveur
+            </h2>
+            <small class="text-muted">
+                Gestion des tables et commandes
+            </small>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">
+                        Tables libres
+                    </h6>
+                    <h2 class="fw-bold text-success">
+                        {{ tables_libres }}
+                    </h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">
+                        Tables occupées
+                    </h6>
+                    <h2 class="fw-bold text-danger">
+                        {{ tables_occupees }}
+                    </h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">
+                        Commandes en cours
+                    </h6>
+                    <h2 class="fw-bold text-warning">
+                        {{ commandes_en_cours }}
+                    </h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">
+                        Commandes prêtes
+                    </h6>
+                    <h2 class="fw-bold text-primary">
+                        {{ commandes_pretes }}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLES -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold">
+            Tables Restaurant
+        </h4>
+    </div>
+    <div class="row">
+        {% for table in tables %}
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold">
+                            {{ table.name }}
+                        </h5>
+                        {% if table.status == 'free' %}
+                            <span class="badge bg-success">
+                                Libre
+                            </span>
+                        {% elif table.status == 'occupied' %}
+                            <span class="badge bg-danger">
+                                Occupée
+                            </span>
+                        {% elif table.status == 'reserved' %}
+                            <span class="badge bg-warning text-dark">
+                                Réservée
+                            </span>
+                        {% endif %}
+                    </div>
+                    <hr>
+                    <p class="mb-1">
+                        <strong>Capacité :</strong>
+                        {{ table.capacity }}
+                    </p>
+                    <p class="mb-3">
+                        <strong>Client :</strong>
+                        {% if table.customer %}
+                            {{ table.customer.full_name }}
+                        {% else %}
+                            Aucun
+                        {% endif %}
+                    </p>
+                    {% if table.status == 'free' %}
+                        <a href="{% url 'sale:create_restaurant_sale' table.id %}"
+                           class="btn btn-outline-primary w-100">
+                            Ouvrir Commande
+                        </a>
+                    {% else %}
+                        {% with sale=table.sale_set.last %}
+                            {% if sale %}
+                            <a href="{% url 'sale:sale_detail' sale.id %}"
+                               class="btn btn-dark w-100">
+                                Voir Commande
+                            </a>
+                            {% endif %}
+                        {% endwith %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+    <hr class="my-4">
+    <!-- COMMANDES -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold">
+            Commandes Récentes
+        </h4>
+    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle table-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Commande</th>
+                    <th>Table</th>
+                    <th>Client</th>
+                    <th>Articles</th>
+                    <th>Statut</th>
+                    <th>Total</th>
+                    <th>Heure</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in commandes %}
+                <tr>
+                    <td>
+                        {{ sale.reference }}
+                    </td>
+                    <td>
+                        {{ sale.restaurant_table.name }}
+                    </td>
+                    <td>
+                        {{ sale.customer_name }}
+                    </td>
+                    <td>
+                        {{ sale.items.count }}
+                    </td>
+                    <td>
+                        {% if sale.order_status == 'pending' %}
+                            <span class="badge bg-warning text-dark">
+                                En attente
+                            </span>
+                        {% elif sale.order_status == 'sent' %}
+                            <span class="badge bg-info">
+                                Envoyée cuisine
+                            </span>
+                        {% elif sale.order_status == 'preparing' %}
+                            <span class="badge bg-primary">
+                                Préparation
+                            </span>
+                        {% elif sale.order_status == 'ready' %}
+                            <span class="badge bg-success">
+                                Prête
+                            </span>
+                        {% elif sale.order_status == 'served' %}
+                            <span class="badge bg-dark">
+                                Servie
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ sale.total_amount|intcomma }}
+                        {{ shop.currency }}
+                    </td>
+                    <td>
+                        {{ sale.created_at|timesince }}
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="{% url 'sale:sale_detail' sale.id %}"
+                               class="btn btn-sm btn-outline-dark">
+                                Ouvrir
+                            </a>
+                            {% if sale.order_status == 'pending' %}
+                            <a href="{% url 'sale:send_to_kitchen' sale.id %}"
+                               class="btn btn-sm btn-warning">
+                                Cuisine
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">
+                        Aucune commande en cours.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

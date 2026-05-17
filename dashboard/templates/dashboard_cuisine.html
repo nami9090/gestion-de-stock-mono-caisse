@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Dashboard Cuisine
+{% endblock %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="container-fluid mt-3">
+    <h2 class="mb-4">
+        🍳 Cuisine - Commandes en cours
+    </h2>
+    <div class="row">
+        {% for sale in commandes %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow border-0">
+                <div class="card-body">
+                    <!-- HEADER -->
+                    <div class="d-flex justify-content-between">
+                        <h5>
+                            Table {{ sale.restaurant_table.name }}
+                        </h5>
+                        {% if sale.order_status == 'sent' %}
+                            <span class="badge bg-warning">
+                                Nouvelle
+                            </span>
+                        {% elif sale.order_status == 'preparing' %}
+                            <span class="badge bg-primary">
+                                En préparation
+                            </span>
+                        {% endif %}
+                    </div>
+                    <hr>
+                    <!-- INFOS -->
+                    <p>
+                        <strong>Client :</strong>
+                        {{ sale.customer_name }}
+                    </p>
+                    <p>
+                        <strong>Commande :</strong>
+                        {{ sale.reference }}
+                    </p>
+                    <p>
+                        <strong>Heure :</strong>
+                        {{ sale.created_at|timesince }}
+                    </p>
+                    <hr>
+                    <!-- ITEMS -->
+                    <h6>Plats :</h6>
+                    <ul class="list-group mb-3">
+                        {% for item in sale.items.all %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>
+                                {{ item.product.name }}
+                            </span>
+                            <span>
+                                x{{ item.quantity }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <!-- ACTIONS -->
+                    <div class="d-flex gap-2">
+                        {% if sale.order_status == 'sent' %}
+                            <a href="{% url 'sale:mark_preparing' sale.id %}"class="btn btn-primary w-100">Commencer</a>
+                        {% endif %}
+                        {% if sale.order_status == 'preparing' %}
+                            <a href="{% url 'sale:mark_ready' sale.id %}"class="btn btn-success w-100">Prête</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center text-muted">
+            Aucune commande en cuisine
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

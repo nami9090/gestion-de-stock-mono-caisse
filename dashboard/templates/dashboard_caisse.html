@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% block title %}
+  Dashboard | {% if user.is_authenticated %}{{ user.username }}{% endif %}
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<!-- Main Content -->
+<div id="content">
+   <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">Dashboard Caisse</h2>
+            <p class="text-muted">Bienvenue dans l'espace de gestion caisse</p>
+        </div>
+
+        <div>
+            <a href="{% url 'sale:sale_create' %}" class="btn btn-outline-primary btn-sm">
+                Nouvelle Vente
+            </a>
+        </div>
+    </div>
+    <!-- Statistiques -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h6 class="text-muted">Ventes du jour</h6>
+                    <h2 class="fw-bold">{{ total_ventes|intcomma }}{{shop.currency}}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h6 class="text-muted">Nombre de ventes</h6>
+                    <h2 class="fw-bold">{{ nombre_ventes }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h6 class="text-muted">Commandes restaurant</h6>
+                    <h2 class="fw-bold">{{ commandes_restaurant }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h6 class="text-muted">Factures impayées</h6>
+                    <h2 class="fw-bold text-danger">{{ factures_impayees }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Actions rapides -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Actions Rapides</h5>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="{% url 'sale:sale_create' %}" class="btn btn-primary w-100 py-3">
+                        Nouvelle Vente
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'restaurant:table_list' %}" class="btn btn-success w-100 py-3">
+                        Tables Restaurant
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="" class="btn btn-warning w-100 py-3">
+                        Factures
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'customer:customer_list' %}" class="btn btn-dark w-100 py-3">
+                        Clients
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <!-- Ventes récentes -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold">Ventes Récentes</h5>
+
+                        <a href="{% url 'sale:sale_list' %}" class="btn btn-sm btn-outline-primary">
+                            Voir tout
+                        </a>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Référence</th>
+                                    <th>Client</th>
+                                    <th>Montant</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sale in ventes_recentes %}
+                                <tr>
+                                    <td>
+                                        #{{ sale.id }}
+                                    </td>
+
+                                    <td>
+                                        {{ sale.customer.nom|default:'Client anonyme' }}
+                                    </td>
+
+                                    <td>
+                                        {{ sale.total_amount }}
+                                    </td>
+
+                                    <td>
+                                        {% if sale.is_restaurant_order %}
+                                            <span class="badge bg-success">
+                                                Restaurant
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-primary">
+                                                POS
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {{ sale.created_at|date:"d/m/Y H:i" }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">
+                                        Aucune vente disponible
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Stock faible -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+
+                    <h5 class="fw-bold mb-3">
+                        Stock Faible
+                    </h5>
+
+                    {% for product in produits_stock_faible %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                        <div>
+                            <strong>{{ product.name }}</strong>
+                        </div>
+
+                        <span class="badge bg-danger">
+                            {{ product.stock }} restant(s)
+                        </span>
+
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">
+                        Aucun produit en rupture.
+                    </p>
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+        <!-- Informations supplémentaires -->
+    <div class="row g-4">
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Tables Occupées</h6>
+                    <h1 class="fw-bold text-primary">
+                        {{ tables_occupees }}
+                    </h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Clients enregistrés</h6>
+                    <h1 class="fw-bold text-success">
+                        {{ clients_total }}
+                    </h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Commandes en attente</h6>
+                    <h1 class="fw-bold text-warning">
+                        {{ commandes_restaurant }}
+                    </h1>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    </div>
+</div>
+<!-- End of Main Content -->
+{% endblock %}

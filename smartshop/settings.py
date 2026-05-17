@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     'core',
     'restaurent',
     'customers',
+    'factures.apps.FacturesConfig',
+    'paiements.apps.PaiementsConfig',
     'bootstrap5',
 ]
 

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Formulaire paiement
+{% endblock %}
+
+{% block content %}
+{% load humanize %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5>Paiement - Facture {{ facture.reference }}</h5>
+        </div>
+
+        <div class="card-body">
+
+            <p>
+                <strong>Total :</strong> {{ facture.total|intcomma }} {{ shop.currency }}<br>
+                <strong>Déjà payé :</strong> {{ facture.amount_paid|intcomma }} {{ shop.currency }}<br>
+                <strong>Reste :</strong> {{ facture.remaining|intcomma }} {{ shop.currency }}
+            </p>
+
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+
+                <button class="btn btn-outline-success w-100">
+                    Enregistrer
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

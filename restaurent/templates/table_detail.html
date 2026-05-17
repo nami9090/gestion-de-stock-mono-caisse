@@ -52,7 +52,7 @@
                     <tr>
                         <td>{{ sale.id }}</td>
                         <td>{{ sale.customer_name }}</td>
-                        <td>{{ sale.total_amount }}</td>
+                        <td>{{ sale.total_amount|intcomma }} {{shop.currency}}</td>
                         <td>
                             {{ sale.get_order_status_display }}
                         </td>

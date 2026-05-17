@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
+
 {% block title %}
     Closing report
 {% endblock %}
+
 {% block content %}
 {% load humanize %}
 <div class="container-fluid">
@@ -9,20 +11,24 @@
         <div class="card-header">
             Rapport de clôture - {{ report.date }}
             {% if report.is_admin_view %}
-                <div class="alert alert-danger">
+                <div class="alert alert-danger mt-2">
                     ADMINISTRATEUR : Vue globale de toutes les caisses
                 </div>
             {% else %}
-                <div class="alert alert-info">
+                <div class="alert alert-info mt-2">
                     Vue caisse (vos ventes uniquement)
                 </div>
             {% endif %}
-            <br><br>
-            <a href="{% url 'sale:download_closing_pdf' %}" class="btn btn-outline-success btn-sm">Telecharger PDF</a>
+            <br>
+            <a href="{% url 'sale:download_closing_pdf' %}"
+               class="btn btn-outline-success btn-sm">
+                Télécharger PDF
+            </a>
         </div>
         <div class="card-body">
+            <!-- STATS -->
             <div class="row">
-                <div class="col-lg-4">
+                <div class="col-lg-4 mb-3">
                     <div class="card shadow-lg">
                         <div class="card-body">
                             <h6>Total ventes</h6>
@@ -32,37 +38,38 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="col-lg-4">
+                <div class="col-lg-4 mb-3">
                     <div class="card shadow-lg">
                         <div class="card-body">
                             <h6>Chiffre d'affaires</h6>
                             <span class="badge bg-warning">
-                                {{ report.total_amount|intcomma }} {{ shop.currency }}
+                                {{ report.total_amount|intcomma }}
+                                {{ shop.currency }}
                             </span>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-lg-4">
+                <div class="col-lg-4 mb-3">
                     <div class="card shadow-lg">
                         <div class="card-body">
-                           <h6>Bénéfice</h6>
+                            <h6>Bénéfice</h6>
                             <span class="badge badge-success">
-                                {{ report.total_profit|intcomma }} {{ shop.currency }}
-                            </span> 
+                                {{ report.total_profit|intcomma }}
+                                {{ shop.currency }}
+                            </span>
                         </div>
                     </div>
                 </div>
-                
             </div>
             <hr>
+            <!-- SALES TABLE -->
             <h4>Détails des ventes</h4>
             <div class="table-responsive">
-               <table class="table">
+                <table class="table table-bordered table-striped table-sm ">
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Utilisateur</th>
                             <th>Client</th>
                             <th>Total</th>
                             <th>Bénéfice</th>
@@ -72,15 +79,49 @@
                     <tbody>
                         {% for sale in report.sales %}
                         <tr>
-                            <td>{{ sale.id }}</td>
-                            <td>{{ sale.customer_name }}</td>
-                            <td>{{ sale.total_amount|intcomma }} {{ shop.currency }}</td>
-                            <td>{{ sale.total_profit|intcomma }} {{ shop.currency }}</td>
-                            <td>{{ sale.created_at }}</td>
+                            <td>
+                                {{ sale.id }}
+                            </td>
+                            <!-- USER -->
+                            <td>
+                                {% if sale.user %}
+                                    {{ sale.user.username }}
+                                {% else %}
+                                    ---
+                                {% endif %}
+                            </td>
+                            <!-- CUSTOMER -->
+                            <td>
+                                {% if sale.customer %}
+                                    {{ sale.customer.full_name }}
+                                {% else %}
+                                    Client Ordinaire
+                                {% endif %}
+                            </td>
+                            <!-- TOTAL -->
+                            <td>
+                                {{ sale.total_amount|intcomma }}
+                                {{ shop.currency }}
+                            </td>
+                            <!-- PROFIT -->
+                            <td>
+                                {{ sale.total_profit|intcomma }}
+                                {{ shop.currency }}
+                            </td>
+                            <!-- DATE -->
+                            <td>
+                                {{ sale.created_at|date:"d/m/Y H:i" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                Aucune vente trouvée
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
-                </table> 
+                </table>
             </div>
         </div>
     </div>

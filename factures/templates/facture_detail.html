@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Facture details
+{% endblock %}
+
+{% block content %}
+{% load humanize %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5>Facture {{ facture.reference }}</h5>
+        </div>
+        <div class="card-body">
+            <p>
+                <strong>Client :</strong> {{ facture.customer.full_name|default:"-" }} <br>
+                <strong>Total :</strong> {{ facture.total|intcomma }} {{ shop.currency }}<br>
+                <strong>Payé :</strong> {{ facture.amount_paid|intcomma }} {{ shop.currency }} <br>
+                <strong>Reste :</strong> <span class="text-danger">{{ facture.remaining|intcomma }} {{ shop.currency }}</span>
+            </p>
+            <hr>
+            <h6>Paiements</h6>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Montant</th>
+                        <th>Mode</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in paiements %}
+                    <tr>
+                        <td>{{ p.montant|intcomma }} {{ shop.currency }}</td>
+                        <td>{{ p.mode_paiement }}</td>
+                        <td>{{ p.created_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">
+                            Aucun paiement
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <hr>
+            <div class="d-flex gap-2">
+                <a href="{% url 'paiement:paiement_create' facture.id %}" class="btn btn-outline-success btn-sm">
+                    Ajouter paiement
+                </a>
+                <a href="{% url 'facture:facture_list' %}" class="btn btn-outline-secondary btn-sm">
+                    Retour
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Les paiements
+{% endblock %}
+
+{% block content %}
+{% load humanize %}
+<div class="container-fluid">
+    {% for group in request.user.groups.all %}
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5>
+                Paiements
+                {% if facture %}
+                    - Facture {{ facture.reference }}
+                {% endif %}
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            {% if facture %}
+            <a href="{% url 'paiement_create' facture.id %}"
+               class="btn btn-success btn-sm mb-3">
+                Ajouter paiement
+            </a>
+            {% endif %}
+            <div class="table-responsive">
+                <div class="input-group">
+                   <input type="text" id="searchInput" class="form-control mb-2 rounded" placeholder="Rechercher ici...">
+                   <!--<span>filter</span>-->
+                </div>
+                <table class="table table-sm table-hover" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Facture</th>
+                            <th>Montant</th>
+                            <th>Mode</th>
+                            <th>Référence</th>
+                            <th>Date</th>
+                            {% if group.name == 'Admin' %}
+                            <th>Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for p in paiements %}
+                        <tr>
+                            <td>{{ p.facture.reference }}</td>
+                            <td>{{ p.montant|intcomma }} {{ shop.currency }}</td>
+                            <td>{{ p.mode_paiement }}</td>
+                            <td>{{ p.reference_transaction|default:"-" }}</td>
+                            <td>{{ p.created_at|date:"Y-m-d H:i" }}</td>
+                            {% if group.name == 'Admin' %}
+                            <td>
+                                <a href="{% url 'paiement:paiement_update' p.id %}" class="btn btn-warning btn-sm">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'paiement:paiement_delete' p.id %}" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">
+                                Aucun paiement
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+<script>
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+    const searchValue = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+
+    rows.forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        row.style.display = rowText.includes(searchValue) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}

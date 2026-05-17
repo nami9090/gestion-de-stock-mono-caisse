@@ -21,7 +21,7 @@
             <h5 class="mb-0">
                 Gestion des tables
             </h5>
-            {% if group.name == 'Admin' %}
+            {% if group.name == 'Admin' or group.name == 'Serveur' %}
             <a href="{% url 'restaurant:table_create' %}"
                class="btn btn-outline-success btn-sm">
                 Ajouter une table
@@ -71,12 +71,12 @@
                                    class="btn btn-outline-primary btn-sm">
                                     Voir
                                 </a>
-                                {% if group.name == 'Admin' %}
                                 <!-- MODIFIER -->
                                 <a href="{% url 'restaurant:table_update' table.pk %}"
                                    class="btn btn-outline-warning btn-sm">
                                     Modifier
                                 </a>
+                                {% if group.name == 'Admin' %}
                                 <!-- SUPPRIMER -->
                                 <a href="{% url 'restaurant:table_delete' table.pk %}"
                                    class="btn btn-outline-danger btn-sm">

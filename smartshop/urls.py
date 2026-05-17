@@ -28,6 +28,8 @@ urlpatterns = [
     path('restaurant/', include('restaurent.urls')),
     path('customer/', include('customers.urls')),
     path('dashboard/', include('dashboard.urls')),
+    path('factures/', include('factures.urls')),
+    path('paiements/', include('paiements.urls')),
     path('smartstock-admin/', include('core.urls')),
 ]
 

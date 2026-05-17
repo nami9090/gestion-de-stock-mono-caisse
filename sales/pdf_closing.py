@@ -3,16 +3,17 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
 from datetime import date
-
+from core.models import ShopSettings
+from django.contrib.humanize.templatetags.humanize import intcomma
 from .models import Sale
 
 
 def generate_closing_pdf(user, target_date=None):
-
+    shop = ShopSettings.objects.first()
     if target_date is None:
         target_date = date.today()
 
-    # 🔐 LOGIQUE ROLE-BASED
+    # LOGIQUE ROLE-BASED
 
     if user.groups.filter(name="Admin").exists():
         sales = Sale.objects.filter(
@@ -38,7 +39,7 @@ def generate_closing_pdf(user, target_date=None):
     styles = getSampleStyleSheet()
     elements = []
 
-    # 🧾 TITRE
+    # TITRE
     title = Paragraph(
         f"<b>{title_role}</b><br/>Date: {target_date}",
         styles["Title"]
@@ -46,7 +47,7 @@ def generate_closing_pdf(user, target_date=None):
     elements.append(title)
     elements.append(Spacer(1, 20))
 
-    # 👤 USER INFO
+    # USER INFO
     user_info = Paragraph(
         f"Utilisateur : <b>{user.username}</b>",
         styles["Normal"]
@@ -54,11 +55,11 @@ def generate_closing_pdf(user, target_date=None):
     elements.append(user_info)
     elements.append(Spacer(1, 10))
 
-    # 📊 RÉSUMÉ
+    # RÉSUMÉ
     summary_data = [
         ["Nombre de ventes", total_sales],
-        ["Chiffre d'affaires", f"{total_amount}"],
-        ["Bénéfice total", f"{total_profit}"],
+        ["Chiffre d'affaires", f"{intcomma(total_amount)} {shop.currency}"],
+        ["Bénéfice total", f"{intcomma(total_profit)} {shop.currency}"],
     ]
 
     table = Table(summary_data, colWidths=[200, 200])
@@ -71,7 +72,7 @@ def generate_closing_pdf(user, target_date=None):
     elements.append(table)
     elements.append(Spacer(1, 20))
 
-    # 🧾 DÉTAIL VENTES
+    # DÉTAIL VENTES
     elements.append(Paragraph("<b>Détail des ventes</b>", styles["Heading2"]))
 
     sales_data = [["ID", "Client", "User", "Total", "Profit"]]
@@ -79,10 +80,10 @@ def generate_closing_pdf(user, target_date=None):
     for s in sales:
         sales_data.append([
             str(s.id),
-            s.customer_name or "-",
+            s.customer.full_name or "-",
             s.user.username if s.user else "-",
-            str(s.total_amount),
-            str(s.total_profit),
+            str(intcomma(s.total_amount) + " " + shop.currency),
+            str(intcomma(s.total_profit) + " " + shop.currency),
         ])
 
     sales_table = Table(sales_data, colWidths=[50, 150, 100, 100, 100])

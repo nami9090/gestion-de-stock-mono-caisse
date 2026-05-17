@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Facture formulaire
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow border-0">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+        <div class="card-header bg-primary text-white">
+            <h5>
+                {% if facture %}
+                    Modifier la facture {{ facture.reference }}
+                {% else %}
+                    Nouvelle facture
+                {% endif %}
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+                <button class="btn btn-success btn-sm w-100">
+                    Enregistrer
+                </button>
+
+                <a href="{% url 'facture:facture_list' %}" class="btn btn-secondary btn-sm w-100 mt-2">
+                    Annuler
+                </a>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

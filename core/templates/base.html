@@ -46,9 +46,28 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="{% url 'dashboard:dashboard' %}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Tableau de bord</span></a>
+                {% for group in request.user.groups.all %}
+                    {% if group.name == 'Admin' %}
+                    <a class="nav-link" href="{% url 'dashboard:dashboard_admin' %}">
+                        <i class="fas fa-fw fa-tachometer-alt"></i><span>Tableau de bord</span>
+                    </a>
+                    {% endif %}
+                    {% if group.name == 'Caisse' %}
+                    <a class="nav-link" href="{% url 'dashboard:dashboard_caisse' %}">
+                        <i class="fas fa-fw fa-tachometer-alt"></i><span>Tableau de bord</span>
+                    </a>
+                    {% endif %}
+                    {% if group.name == 'Serveur' %}
+                    <a class="nav-link" href="{% url 'dashboard:dashboard_serveur' %}">
+                        <i class="fas fa-fw fa-tachometer-alt"></i><span>Tableau de bord</span>
+                    </a>
+                    {% endif %}
+                    {% if group.name == 'Cuisine' %}
+                    <a class="nav-link" href="{% url 'dashboard:dashboard_cuisine' %}">
+                        <i class="fas fa-fw fa-tachometer-alt"></i><span>Tableau de bord</span>
+                    </a>
+                    {% endif %}
+                {% endfor %}
             </li>
 
             <!-- Divider -->
@@ -59,7 +78,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                 Interface
             </div>
             {% for group in request.user.groups.all %}
-            {% if group.name == 'Admin' or group.name == 'Caisse' %}
+            {% if group.name == 'Admin' %}
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="" data-toggle="collapse" data-target="#collapseComponents" arial-expanded="true" aria-controls="collapseComponents">
@@ -85,7 +104,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
             {% if group.name == 'Admin' %}
              <li class="nav-item">
                 <a class="nav-link collapsed" href="" data-toggle="collapse" data-target="#collapseStock" arial-expanded="true" aria-controls="collapseStock">
-                    <i class="bi bi-kanban"></i>
+                    <i class="bi bi-floppy2-fill"></i>
                     <span>Gestion des stocks</span>
                 </a>
                 <div id="collapseStock" class="collapse" aria-labelledby="headingStock"
@@ -103,7 +122,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCondition"
                     aria-expanded="true" aria-controls="collapseCondition">
-                    <i class="bi bi-ticket-perforated"></i>
+                    <i class="bi bi-bucket"></i>
                     <span>Gestion des fournisseurs</span>
                 </a>
                 <div id="collapseCondition" class="collapse" aria-labelledby="headingCondition"
@@ -174,7 +193,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                 </div>
             </li>
             {% endif %}
-            {% if group.name == 'Admin' or group.name == 'Caisse' %}
+            {% if group.name == 'Admin' or group.name == 'Serveur' %}
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle='collapse' data-target='#collapseRestarent' 
                     aria-expanded='true' aria-controls='collapseRestarent' >
@@ -187,6 +206,42 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                         <h6 class="collapse-header">Gestion Restaurent</h6>
                         <a class="collapse-item" href="{% url 'restaurant:table_list' %}">
                         <span class="text-primary">Gestion Restaurent</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
+            {% endif %}
+            {% if group.name == 'Admin' or group.name == 'Caisse' %}
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle='collapse' data-target='#collapsePaiement' 
+                    aria-expanded='true' aria-controls='collapsePaiement' >
+                    <i class="bi bi-clipboard-data"></i>
+                    <span>Gestion Paiement</span>
+                </a>
+                <div id="collapsePaiement" class="collapse" aria-labelledby="headingPaiement"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Gestion Paiement</h6>
+                        <a class="collapse-item" href="{% url 'paiement:paiement_list' %}">
+                        <span class="text-primary">Gestion Paiement</span>
+                        </a>
+                    </div>
+                </div>
+            </li>
+            {% endif %}
+            {% if group.name == 'Admin' or group.name == 'Caisse' %}
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle='collapse' data-target='#collapseFacture' 
+                    aria-expanded='true' aria-controls='collapseFacture' >
+                    <i class="bi bi-clipboard-data"></i>
+                    <span>Gestion Facture</span>
+                </a>
+                <div id="collapseFacture" class="collapse" aria-labelledby="headingFacture"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Gestion Facture</h6>
+                        <a class="collapse-item" href="{% url 'facture:facture_list' %}">
+                        <span class="text-primary">Gestion Facture</span>
                         </a>
                     </div>
                 </div>
@@ -462,8 +517,8 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                 </div>
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="{% url 'user:login' %}">Logout</a>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-outline-primary btn-sm" href="{% url 'user:login' %}">Logout</a>
                 </div>
             </div>
         </div>

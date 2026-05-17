@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Confirmer la suppression
+{% endblock %}
+
+{% block content %}
+{% load humanize %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+        <div class="card-body">
+
+            <h5>Supprimer paiement ?</h5>
+
+            <p>Facture : {{ paiement.facture.reference }}</p>
+            <p>Montant : {{ paiement.montant|intcomma }} {{shop.currency}}</p>
+
+            <form method="POST">
+                {% csrf_token %}
+                <button class="btn btn-outline-danger btn-sm">Confirmer</button>
+                <a href="{% url 'paiement:paiement_list' %}"
+                   class="btn btn-outline-secondary btn-sm">
+                    Annuler
+                </a>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -4,6 +4,9 @@ from django.contrib import messages
 from .forms import CustomerForm
 from .models import Customer
 
+from django.db.models import Sum
+from factures.models import Facture
+
 from sales.models import Sale
 from core.models import ShopSettings
 from accounts.decorators import role_required
@@ -51,21 +54,43 @@ def customer_create(request):
 @login_required
 @role_required('Admin', 'Caisse')
 def customer_detail(request, pk):
-    customer = get_object_or_404(Customer,pk=pk)
-    sales = Sale.objects.filter(customer=customer).order_by('-created_at')
-    shop = ShopSettings.objects.first()
-    total_spent = sum(
-        sale.total_amount
-        for sale in sales
+    customer = get_object_or_404(Customer, pk=pk)
+    sales = Sale.objects.filter(
+        customer=customer
+    ).order_by('-created_at')
+    
+    # =====================================
+    # FACTURES CLIENT
+    # =====================================
+    factures = Facture.objects.filter(
+        customer=customer
+    ).order_by('-created_at')
+    factures_impayees = factures.filter(
+        status__in=['issued', 'partial', 'draft']
     )
-
+    total_impaye = factures_impayees.aggregate(
+        total=Sum('total')
+    )['total'] or 0
+    # =====================================
+    # TOTAL SPENT
+    # =====================================
+    total_spent = sum(
+        sale.total_amount for sale in sales
+    )
+    shop = ShopSettings.objects.first()
     context = {
         'customer': customer,
         'sales': sales,
-        'total_spent': total_spent,
-        'shop':shop,
-    }
 
+        # FACTURES
+        'factures': factures,
+        'factures_impayees': factures_impayees,
+        'total_impaye': total_impaye,
+
+        # SALES
+        'total_spent': total_spent,
+        'shop': shop,
+    }
     return render(request,'customer_detail.html',context)
 
 

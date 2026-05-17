@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
 from decimal import Decimal
-
+from django.utils import timezone
 from products.models import Product
 from restaurent.models import RestaurantTable
 from customers.models import Customer
@@ -34,16 +34,45 @@ class Sale(models.Model):
 
     ORDER_STATUS = [
         ("pending", "En attente"),
+        ("sent", "Envoyée cuisine"),
         ("preparing", "En préparation"),
-        ("served", "Servi"),
-        ("paid", "Payé"),
+        ("ready", "Prête"),
+        ("served", "Servie"),
+        ("paid", "Payée"),
     ]
     is_restaurant_order = models.BooleanField(default=False)
-
     restaurant_table = models.ForeignKey(RestaurantTable,on_delete=models.SET_NULL,null=True,blank=True)
-
     order_status = models.CharField(max_length=20,choices=ORDER_STATUS,default="pending")
-    
+    reference = models.CharField(max_length=30,unique=True,blank=True,null=True)
+
+    @staticmethod
+    def generate_reference():
+        year = timezone.now().year
+        last_sale = Sale.objects.order_by('-id').first()
+
+        if last_sale:
+            next_id = last_sale.id + 1
+        else:
+            next_id = 1
+
+        reference = f"SAL-{year}-{next_id:05d}"
+
+        while Sale.objects.filter(
+            reference=reference
+        ).exists():
+
+            next_id += 1
+
+            reference = f"SAL-{year}-{next_id:05d}"
+
+        return reference
+
+    def save(self, *args, **kwargs):
+        if not self.reference:
+            self.reference = self.generate_reference()
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Vente #{self.id}"
 

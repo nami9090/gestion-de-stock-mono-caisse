@@ -24,4 +24,9 @@ urlpatterns = [
 
     path('<int:sale_id>/add-item/', views.add_sale_item,name='add_sale_item'),
 
+    path('<int:sale_id>/send/', views.send_to_kitchen, name='send_to_kitchen'),
+
+    path('<int:sale_id>/mark-preparing/', views.mark_preparing, name='mark_preparing'),
+    path('<int:sale_id>/mark-ready/', views.mark_ready, name='mark_ready'),
+
 ]

@@ -6,6 +6,7 @@ from accounts.decorators import role_required
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import RestaurantTableForm
+from core.models import ShopSettings
 
 # Create your views here.
 
@@ -13,7 +14,7 @@ from .forms import RestaurantTableForm
 # LISTE TABLES
 # =========================
 @login_required
-@role_required('Admin','Caisse')
+@role_required('Admin','Serveur')
 def table_list(request):
     tables = RestaurantTable.objects.all()
     context = {
@@ -26,8 +27,9 @@ def table_list(request):
 # DETAIL TABLE
 # =========================
 @login_required
-@role_required('Admin','Caisse')
+@role_required('Admin','Serveur')
 def table_detail(request, pk):
+    shop = ShopSettings.objects.first()
     table = get_object_or_404(RestaurantTable, pk=pk)
     sales = Sale.objects.filter(
         restaurant_table=table,
@@ -35,7 +37,8 @@ def table_detail(request, pk):
     ).order_by('-created_at')
     context = {
     	'table':table,
-    	'sales':sales
+    	'sales':sales,
+        'shop':shop
     }
     return render(request, 'table_detail.html', context)
 
@@ -44,7 +47,7 @@ def table_detail(request, pk):
 # MODIFIER TABLE
 # =========================
 @login_required
-@role_required('Admin','Caisse')
+@role_required('Admin','Serveur')
 def table_update(request, pk):
     table = get_object_or_404(RestaurantTable,pk=pk)
     form = RestaurantTableForm(request.POST or None,instance=table)
@@ -80,7 +83,7 @@ def table_delete(request, pk):
 
 # OUVRIR TABLE
 @login_required
-@role_required('Admin','Caisse')
+@role_required('Admin','Serveur')
 def open_table(request, pk):
     table = get_object_or_404(RestaurantTable, pk=pk)
     table.status = 'occupied'
@@ -90,7 +93,7 @@ def open_table(request, pk):
 
 # LIBERER TABLE
 @login_required
-@role_required('Admin','Caisse')
+@role_required('Admin','Serveur')
 def close_table(request, pk):
     table = get_object_or_404(RestaurantTable, pk=pk)
     table.status = 'free'
@@ -102,7 +105,7 @@ def close_table(request, pk):
 # CREATION TABLE
 # =========================
 @login_required
-@role_required('Admin')
+@role_required('Admin','Serveur')
 def table_create(request):
     form = RestaurantTableForm(request.POST or None)
     if form.is_valid():
@@ -115,7 +118,7 @@ def table_create(request):
     return render(request, 'table_form.html', context)
 
 @login_required
-@role_required('Admin','Caisse')
+@role_required('Admin', 'Serveur')
 def delete_sale(request, sale_id):
     sale = get_object_or_404(
         Sale,

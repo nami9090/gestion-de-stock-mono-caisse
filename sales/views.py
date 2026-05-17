@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from accounts.decorators import role_required
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import transaction
 from .models import Sale, SaleItem
 from .forms import SaleForm, SaleItemForm
 
@@ -12,7 +13,7 @@ from customers.models import Customer
 
 from core.models import ShopSettings
 from .sale_report import closing_report
-
+from factures.models import Facture
 from restaurent.models import RestaurantTable
 
 from .pdf_closing import generate_closing_pdf
@@ -26,7 +27,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import HRFlowable
-from reportlab.lib.enums import TA_RIGHT, TA_LEFT
+from reportlab.lib.enums import TA_RIGHT, TA_LEFT, TA_CENTER
 from reportlab.platypus import KeepTogether
 from io import BytesIO
 from datetime import datetime
@@ -38,12 +39,14 @@ from reportlab.platypus import ListFlowable, ListItem
 @role_required('Admin','Caisse')
 def sale_list(request):
     if request.user.is_superuser:
-        sales = Sale.objects.filter(status='completed').order_by('-created_at')
+        sales = Sale.objects.filter(
+            status='completed',
+        ).select_related('facture', 'customer', 'user').order_by('-created_at')
     else:
         sales = Sale.objects.filter(
             status='completed',
-            user=request.user
-        ).order_by('-created_at')
+            # user=request.user
+        ).select_related('facture', 'customer', 'user').order_by('-created_at')
     shop = ShopSettings.objects.first()
     context = {
         'sales':sales,
@@ -55,12 +58,40 @@ def sale_list(request):
 @login_required
 @role_required('Admin', 'Caisse')
 def sale_invoice(request, pk):
-    sale = get_object_or_404(Sale, id=pk)
+
+    sale = get_object_or_404(
+        Sale.objects.select_related(
+            'customer',
+            'facture',
+            'restaurant_table',
+            'user'
+        ),
+        id=pk
+    )
+
     shop = ShopSettings.objects.first()
 
+    # =========================
+    # FACTURE
+    # =========================
+    facture = getattr(sale, 'facture', None)
+
+    # =========================
+    # PDF BUFFER
+    # =========================
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
+
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=30,
+        leftMargin=30,
+        topMargin=30,
+        bottomMargin=18
+    )
+
     elements = []
+
     styles = getSampleStyleSheet()
 
     right_style = ParagraphStyle(
@@ -69,49 +100,154 @@ def sale_invoice(request, pk):
         alignment=TA_RIGHT
     )
 
+    center_style = ParagraphStyle(
+        name="Center",
+        parent=styles["Normal"],
+        alignment=TA_CENTER
+    )
+
     # =========================
     # HEADER
     # =========================
     if shop.logo:
-        elements.append(Image(shop.logo.path, width=1.5*inch, height=1.5*inch))
+        try:
+            elements.append(
+                Image(
+                    shop.logo.path,
+                    width=1.2 * inch,
+                    height=1.2 * inch
+                )
+            )
+        except:
+            pass
 
-    elements.append(Paragraph(f"<b>{shop.name}</b>", styles["Heading1"]))
-    elements.append(Paragraph(shop.address, styles["Normal"]))
-    elements.append(Paragraph(f"Tél: {shop.phone}", styles["Normal"]))
+    elements.append(
+        Paragraph(
+            f"<b>{shop.name}</b>",
+            styles["Title"]
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            shop.address or "",
+            center_style
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            f"Tél : {shop.phone}",
+            center_style
+        )
+    )
+
     elements.append(Spacer(1, 10))
-    elements.append(HRFlowable(width="100%", thickness=1, color=colors.grey))
+
+    elements.append(
+        HRFlowable(
+            width="100%",
+            thickness=1,
+            color=colors.grey
+        )
+    )
+
     elements.append(Spacer(1, 15))
 
     # =========================
-    # INFO CLIENT + FACTURE
+    # CLIENT + FACTURE INFOS
     # =========================
-    invoice_number = f"FACT-{sale.id:05d}"
+    invoice_number = (
+        facture.reference
+        if facture
+        else f"FACT-{sale.id:05d}"
+    )
+
     date_now = sale.created_at.strftime("%d/%m/%Y")
 
+    customer_name = (
+        sale.customer.full_name
+        if sale.customer
+        else sale.customer_name or "Client occasionnel"
+    )
+
+    customer_phone = (
+        sale.customer.phone
+        if sale.customer
+        else sale.customer_phone or "-"
+    )
+
     info_data = [[
+
         Paragraph(
-            f"<b>Client :</b><br/>{sale.customer_name}<br/>{sale.customer_phone}",
+            f"""
+            <b>Client :</b><br/>
+            {customer_name}<br/>
+            {customer_phone}
+            """,
             styles["Normal"]
         ),
+
         Paragraph(
-            f"<b>Facture N° :</b> {invoice_number}<br/><b>Date :</b> {date_now}",
+            f"""
+            <b>Facture :</b> {invoice_number}<br/>
+            <b>Date :</b> {date_now}<br/>
+            <b>Caissier :</b> {sale.user.username}
+            """,
             right_style
         )
+
     ]]
 
-    info_table = Table(info_data, colWidths=[3.5*inch, 2.5*inch])
+    info_table = Table(
+        info_data,
+        colWidths=[3.5 * inch, 2.5 * inch]
+    )
+
     elements.append(info_table)
+
     elements.append(Spacer(1, 20))
+
+    # =========================
+    # RESTAURANT INFO
+    # =========================
+    if sale.is_restaurant_order:
+
+        restaurant_data = [[
+            "Table",
+            sale.restaurant_table.name if sale.restaurant_table else "-"
+        ]]
+
+        restaurant_table = Table(
+            restaurant_data,
+            colWidths=[2 * inch, 4 * inch]
+        )
+
+        restaurant_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+
+        elements.append(restaurant_table)
+
+        elements.append(Spacer(1, 15))
 
     # =========================
     # TABLE PRODUITS
     # =========================
-    data = [["Produit", "Qté", "Prix U.", "Total"]]
+    data = [[
+        "Produit",
+        "Qté",
+        "Prix U.",
+        "Total"
+    ]]
 
     total_general = Decimal("0.00")
 
     for item in sale.items.all():
+
         total = item.quantity * item.selling_price
+
         total_general += total
 
         data.append([
@@ -121,54 +257,170 @@ def sale_invoice(request, pk):
             f"{total:,.0f} {shop.currency}",
         ])
 
-    table = Table(data, colWidths=[2.5*inch, 1*inch, 1.2*inch, 1.2*inch])
+    table = Table(
+        data,
+        colWidths=[
+            2.8 * inch,
+            0.8 * inch,
+            1.5 * inch,
+            1.5 * inch
+        ]
+    )
 
     table.setStyle(TableStyle([
+
         ('BACKGROUND', (0, 0), (-1, 0), colors.black),
+
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+
         ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+
     ]))
 
     elements.append(table)
+
     elements.append(Spacer(1, 20))
 
     # =========================
     # TOTALS
     # =========================
     tva_rate = Decimal(shop.tva if shop.tva else 0)
+
     tva = total_general * (tva_rate / Decimal("100"))
+
     grand_total = total_general + tva
 
+    amount_paid = (
+        facture.amount_paid
+        if facture
+        else Decimal("0.00")
+    )
+
+    remaining = (
+        facture.remaining
+        if facture
+        else grand_total
+    )
+
     totals_data = [
-        ["Sous-total :", f"{total_general:,.0f} {shop.currency}"],
-        [f"TVA ({tva_rate}%) :", f"{tva:,.0f} {shop.currency}"],
-        ["TOTAL :", f"{grand_total:,.0f} {shop.currency}"],
+
+        [
+            "Sous-total :",
+            f"{total_general:,.0f} {shop.currency}"
+        ],
+
+        [
+            f"TVA ({tva_rate}%) :",
+            f"{tva:,.0f} {shop.currency}"
+        ],
+
+        [
+            "TOTAL :",
+            f"{grand_total:,.0f} {shop.currency}"
+        ],
+
+        [
+            "Montant payé :",
+            f"{amount_paid:,.0f} {shop.currency}"
+        ],
+
+        [
+            "Reste à payer :",
+            f"{remaining:,.0f} {shop.currency}"
+        ],
+
     ]
 
-    totals_table = Table(totals_data, colWidths=[3.7*inch, 1.5*inch])
+    totals_table = Table(
+        totals_data,
+        colWidths=[3.8 * inch, 2 * inch]
+    )
+
     totals_table.setStyle(TableStyle([
+
         ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
+
+        ('FONTNAME', (0, 2), (-1, 2), 'Helvetica-Bold'),
+
         ('LINEABOVE', (0, 2), (-1, 2), 1, colors.black),
+
+        ('TEXTCOLOR', (0, 4), (-1, 4), colors.red),
+
     ]))
 
     elements.append(totals_table)
-    elements.append(Spacer(1, 30))
+
+    elements.append(Spacer(1, 25))
+
+    # =========================
+    # STATUT FACTURE
+    # =========================
+    if facture:
+
+        if facture.status == 'paid':
+            statut = "FACTURE PAYÉE"
+
+        elif facture.status == 'partial':
+            statut = "PAIEMENT PARTIEL"
+
+        elif facture.status == 'issued':
+            statut = "NON PAYÉE"
+
+        else:
+            statut = "BROUILLON"
+
+        elements.append(
+            Paragraph(
+                f"<b>Statut :</b> {statut}",
+                styles["Heading3"]
+            )
+        )
+
+        elements.append(Spacer(1, 15))
 
     # =========================
     # FOOTER
     # =========================
-    elements.append(HRFlowable(width="100%", thickness=0.5, color=colors.grey))
-    elements.append(Spacer(1, 10))
-    elements.append(Paragraph("Merci pour votre confiance :)", styles["Normal"]))
+    elements.append(
+        HRFlowable(
+            width="100%",
+            thickness=0.5,
+            color=colors.grey
+        )
+    )
 
+    elements.append(Spacer(1, 10))
+
+    elements.append(
+        Paragraph(
+            "Merci pour votre confiance 🙂",
+            center_style
+        )
+    )
+
+    # =========================
+    # BUILD PDF
+    # =========================
     doc.build(elements)
 
     pdf = buffer.getvalue()
+
     buffer.close()
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'inline; filename="facture_{sale.id}.pdf"'
+    response = HttpResponse(
+        content_type='application/pdf'
+    )
+
+    response['Content-Disposition'] = (
+        f'inline; filename="facture_{sale.id}.pdf"'
+    )
+
     response.write(pdf)
 
     return response
@@ -178,80 +430,158 @@ def sale_invoice(request, pk):
 def generate_invoice(request, pk):
     pass
 
-@login_required
-@role_required('Admin', 'Caisse')
-def sale_create(request):
-    #récupérer boutique
-    shop = ShopSettings.objects.first()
 
-    #récupérer vente en session
+@login_required
+@role_required('Admin', 'Caisse', 'Serveur')
+@transaction.atomic
+def sale_create(request):
+    shop = ShopSettings.objects.first()
+    # =========================================
+    # GET OR CREATE SALE
+    # =========================================
     sale_id = request.session.get('sale_id')
 
     if sale_id:
-        try:
-            sale = Sale.objects.get(id=sale_id)
-        except Sale.DoesNotExist:
+        sale = Sale.objects.filter(id=sale_id).first()
+
+        if not sale:
             sale = Sale.objects.create(
-                user=request.user
+                user=request.user,
+                status='draft'
             )
             request.session['sale_id'] = sale.id
+
     else:
         sale = Sale.objects.create(
-            user=request.user
+            user=request.user,
+            status='draft'
         )
         request.session['sale_id'] = sale.id
 
-    #charger clients
+    # =========================================
+    # GET OR CREATE FACTURE
+    # =========================================
+    facture, created = Facture.objects.get_or_create(
+        sale=sale,
+        defaults={
+            'customer': sale.customer,
+            'total': sale.total_amount,
+        }
+    )
+
+    # =========================================
+    # FORMS
+    # =========================================
     customers = Customer.objects.all()
+
     sale_form = SaleForm(instance=sale)
     form = SaleItemForm()
 
-    # ===================================
-    # AJOUT PRODUIT
-    # ===================================
-
+    # =========================================
+    # POST
+    # =========================================
     if request.method == "POST":
 
-        #CLIENT
         customer_id = request.POST.get('customer')
-        if customer_id:
-            try:
-                customer = Customer.objects.get(id=customer_id)
-                sale.customer = customer
-            except Customer.DoesNotExist:
-                pass
 
-        #sauvegarder vente
+        # =====================================
+        # UPDATE CUSTOMER
+        # =====================================
+        if customer_id:
+
+            customer = Customer.objects.filter(
+                id=customer_id
+            ).first()
+
+            if customer:
+                sale.customer = customer
+                sale.save()
+
+                # sync facture
+                facture.customer = customer
+                facture.save()
+
+        # =====================================
+        # SALE FORM
+        # =====================================
         sale_form = SaleForm(
             request.POST,
             instance=sale
         )
+
         if sale_form.is_valid():
+
             sale = sale_form.save(commit=False)
-            # garder client sélectionné
+
             if customer_id:
                 sale.customer = customer
+
             sale.save()
 
-        #formulaire produit
+        # =====================================
+        # ITEM FORM
+        # =====================================
         form = SaleItemForm(request.POST)
+
         if form.is_valid():
+
             item = form.save(commit=False)
+
             item.sale = sale
 
-            # prix automatiques
+            # snapshot prices
             item.selling_price = item.product.selling_price
             item.purchase_price = item.product.purchase_price
 
-            #vérification stock
+            # =================================
+            # STOCK VALIDATION
+            # =================================
             if item.quantity > item.product.stock:
-                messages.warning(request,"Stock insuffisant.")
+
+                messages.warning(
+                    request,
+                    f"Stock insuffisant pour {item.product.name}."
+                )
+
             else:
+
+                # save item
                 item.save()
-                messages.success(request,"Produit ajouté à la vente.")
+
+                # =================================
+                # UPDATE FACTURE
+                # =================================
+                sale.refresh_from_db()
+
+                facture.total = sale.total_amount
+                facture.customer = sale.customer
+
+                # IMPORTANT
+                facture.save()
+
+                messages.success(
+                    request,
+                    "Produit ajouté à la vente."
+                )
+
                 return redirect('sale:sale_create')
 
-    items = sale.items.all()
+    # =========================================
+    # UPDATE FACTURE TOTAL
+    # =========================================
+    sale.refresh_from_db()
+
+    facture.total = sale.total_amount
+    facture.customer = sale.customer
+    facture.save()
+
+    # =========================================
+    # DATA
+    # =========================================
+    items = sale.items.select_related(
+        'product'
+    ).all()
+
     context = {
         'sale': sale,
         'items': items,
@@ -259,11 +589,17 @@ def sale_create(request):
         'form': form,
         'shop': shop,
         'customers': customers,
+        'facture': facture,
     }
-    return render(request, 'sale_create.html',context)
+
+    return render(
+        request,
+        'sale_create.html',
+        context
+    )
 
 @login_required
-@role_required('Admin', 'Caisse')
+@role_required('Admin', 'Caisse', 'Serveur')
 def sale_finalize(request):
     sale_id = request.session.get('sale_id')
 
@@ -332,7 +668,7 @@ def sale_delete(request, pk):
 
 
 @login_required
-@role_required('Admin', 'Caisse')
+@role_required('Admin', 'Caisse', 'Serveur')
 def saleitem_delete(request, pk):
     # Récupérer l'item
     item = get_object_or_404(SaleItem, id=pk)
@@ -351,7 +687,7 @@ def saleitem_delete(request, pk):
 
 
 @login_required
-@role_required('Admin', 'Caisse')
+@role_required('Admin', 'Caisse', 'Serveur')
 def sale_detail(request, pk):
     sale = get_object_or_404(Sale, pk=pk)
     items = sale.items.all()
@@ -370,15 +706,17 @@ def sale_invoice_pos(request, pk):
         Sale,
         pk=pk,
         status='completed',
-        user=request.user
+        # user=request.user
     )
-
+    facture = get_object_or_404(Facture, sale=sale)
     shop = ShopSettings.objects.first()
     context = {
-        'sale':sale,
-        'shop':shop,
+        'sale': sale,
+        'facture': facture,
+        'shop': shop,
     }
-    return render(request,'sale_invoice_pos.html', context)
+
+    return render(request, 'sale_invoice_pos.html', context)
 
 @login_required
 @role_required('Admin','Caisse')
@@ -402,47 +740,105 @@ def download_closing_pdf(request):
     return response
 
 @login_required
-@role_required('Admin','Caisse')
+@role_required('Admin', 'Caisse', 'Serveur')
+@transaction.atomic
 def create_restaurant_sale(request, table_id):
-    table = get_object_or_404(RestaurantTable, id=table_id)
 
-    # Vérifier si une commande existe déjà
+    table = get_object_or_404(
+        RestaurantTable,
+        id=table_id
+    )
+
+    # =====================================
+    # CHECK EXISTING SALE
+    # =====================================
     existing_sale = Sale.objects.filter(
         restaurant_table=table,
-        status='draft'
+        status='draft',
+        is_restaurant_order=True
     ).first()
 
     if existing_sale:
-        return redirect('sale:sale_detail', existing_sale.id)
 
-    # Client automatique
+        # save session
+        request.session['sale_id'] = existing_sale.id
+
+        messages.info(
+            request,
+            f"Une commande existe déjà pour la table {table.name}."
+        )
+
+        return redirect('sale:sale_create')
+
+    # =====================================
+    # AUTO CUSTOMER
+    # =====================================
     customer = table.customer
 
-    # Créer nouvelle commande
+    # =====================================
+    # CREATE SALE
+    # =====================================
     sale = Sale.objects.create(
+
         user=request.user,
+
         status='draft',
+
         is_restaurant_order=True,
+
         restaurant_table=table,
-        # Liaison avec client
-        customer = customer,
 
-        customer_name=customer.full_name
-        if customer else f"Table {table.name}",
+        customer=customer,
 
-        customer_phone = customer.phone
-        if customer else "",
+        customer_name=(
+            customer.full_name
+            if customer
+            else f"Table {table.name}"
+        ),
+
+        customer_phone=(
+            customer.phone
+            if customer
+            else ""
+        ),
 
         order_status='pending'
     )
-    # OCCUPER LA TABLE
+
+    # =====================================
+    # CREATE FACTURE
+    # =====================================
+    facture, created = Facture.objects.get_or_create(
+        sale=sale,
+        defaults={
+            'customer': customer,
+            'total': sale.total_amount,
+        }
+    )
+
+    # =====================================
+    # OCCUPY TABLE
+    # =====================================
     table.status = 'occupied'
     table.save()
 
-    return redirect('sale:sale_detail', sale.id)
+    # =====================================
+    # STORE SESSION
+    # =====================================
+    request.session['sale_id'] = sale.id
+
+    messages.success(
+        request,
+        f"Commande ouverte pour la table {table.name}."
+    )
+
+    # =====================================
+    # REDIRECT TO POS SCREEN
+    # =====================================
+    return redirect('sale:sale_create')
 
 @login_required
-@role_required('Admin','Caisse')
+@role_required('Admin','Caisse','Serveur')
 def update_order_status(request, sale_id, status):
     sale = get_object_or_404(Sale, id=sale_id)
     sale.order_status = status
@@ -462,7 +858,7 @@ def update_order_status(request, sale_id, status):
 
 
 @login_required
-@role_required('Admin','Caisse')
+@role_required('Admin','Caisse', 'Serveur')
 def add_sale_item(request, sale_id):
     sale = get_object_or_404(Sale, id=sale_id)
 
@@ -516,3 +912,47 @@ def add_sale_item(request, sale_id):
         'products': products,
     }
     return render(request, 'add_sale_item.html', context)
+
+@login_required
+@role_required('Serveur', 'Admin')
+def send_to_kitchen(request, sale_id):
+
+    sale = get_object_or_404(
+        Sale,
+        id=sale_id
+    )
+
+    sale.order_status = 'sent'
+
+    sale.save()
+
+    messages.success(
+        request,
+        "Commande envoyée à la cuisine."
+    )
+
+    return redirect('dashboard:dashboard_serveur')
+
+@login_required
+@role_required('Admin', 'Cuisine')
+def mark_preparing(request, sale_id):
+    sale = get_object_or_404(
+        Sale,
+        id=sale_id
+    )
+    sale.order_status = 'preparing'
+    sale.save()
+
+    return redirect('dashboard:dashboard_cuisine')
+
+
+@login_required
+@role_required('Admin', 'Cuisine')
+def mark_ready(request, sale_id):
+    sale = get_object_or_404(
+        Sale,
+        id=sale_id
+    )
+    sale.order_status = 'ready'
+    sale.save()
+    return redirect('dashboard:dashboard_cuisine')

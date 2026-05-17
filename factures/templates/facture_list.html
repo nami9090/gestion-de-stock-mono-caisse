@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Liste des factures
+{% endblock %}
+
+{% block content %}
+{% load humanize %}
+
+<div class="container-fluid">
+    {% for group in request.user.groups.all %}
+    {% if messages %}
+          {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+    {% endif %}
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5>Liste des factures</h5>
+        </div>
+        <div class="card-body">
+            <a href="{% url 'facture:facture_create' %}" class="btn btn-success btn-sm mb-3">
+                Nouvelle facture <i class="bi bi-plus-square"></i>
+            </a>
+            <div class="table-responsive">
+                 <div class="input-group">
+                   <input type="text" id="searchInput" class="form-control mb-2 rounded" placeholder="Rechercher ici...">
+                   <!--<span>filter</span>-->
+                </div>
+                <table class="table table-sm table-hover" id="dataTable" >
+                    <thead>
+                        <tr>
+                            <th>Référence</th>
+                            <th>Client</th>
+                            <th>Total</th>
+                            <th>Payé</th>
+                            <th>Reste</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in factures %}
+                        <tr>
+                            <td>{{ f.reference }}</td>
+                            <td>{{ f.customer.full_name|default:"-" }}</td>
+                            <td>{{ f.total|intcomma }} {{ shop.currency }}</td>
+                            <td>{{ f.amount_paid|intcomma }} {{ shop.currency }}</td>
+                            <td class="text-danger">{{ f.remaining|intcomma }} {{ shop.currency }}</td>
+                            <td>
+                                {% if f.status == 'paid' %}
+                                    <span class="badge bg-success">Payée</span>
+                                {% elif f.status == 'partial' %}
+                                    <span class="badge bg-warning">Partielle</span>
+                                {% elif f.status == 'issued' %}
+                                    <span class="badge bg-info">Émise</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Brouillon</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'facture:facture_detail' f.id %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-list-task"></i>
+                                </a>
+                                {% if group.name == 'Admin' %}
+                                <a href="{% url 'facture:facture_update' f.id %}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'facture:facture_delete' f.id %}" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">
+                                Aucune facture
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<script>
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+    const searchValue = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+
+    rows.forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        row.style.display = rowText.includes(searchValue) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}

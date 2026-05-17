@@ -1,70 +1,265 @@
 {% load humanize %}
 <!DOCTYPE html>
-<html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
     <title>
-        Vente invoice POS
+        Facture {{ facture.reference }}
     </title>
-    <head>
-        <title>Ticket {{ sale.id }}</title>
-        <style>
-            body {
-                font-family: monospace;
-                width: 80mm;
+
+    <style>
+
+        body{
+            font-family: monospace;
+            width: 80mm;
+            margin: 0;
+            padding: 5px;
+            font-size: 12px;
+        }
+
+        h3,h4,p{
+            margin: 2px 0;
+        }
+
+        table{
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .line{
+            border-top: 1px dashed #000;
+            margin: 6px 0;
+        }
+
+        .right{
+            text-align: right;
+        }
+
+        .center{
+            text-align: center;
+        }
+
+        .bold{
+            font-weight: bold;
+        }
+
+        .small{
+            font-size: 11px;
+        }
+
+        @media print{
+
+            @page{
+                size: 80mm auto;
                 margin: 0;
-                padding: 5px;
             }
-            h4 {
-                text-align: center;
-                margin: 5px 0;
+
+            body{
+                margin: 0;
             }
-            table {
-                width: 100%;
-                font-size: 12px;
-            }
-            .line {
-                border-top: 1px dashed black;
-                margin: 5px 0;
-            }
-            @media print {
-                @page {
-                    size: 80mm auto;
-                    margin: 0;
-                }
-                body {
-                    margin: 0;
-                }
-            }
-        </style>
-    </head>
-    <body onload="window.print()">
-        <h4>{{ shop.name }}</h4>
-        <div style="text-align:center;">
-            {{ shop.address }}<br>
-            Tel: {{ shop.phone }}
-        </div>
-        <div class="line"></div>
-        Date: {{ sale.created_at|date:"d/m/Y H:i" }}<br>
-        Vente #: {{ sale.id }}<br>
-        Client #: {{ sale.customer_name }}
-        <div class="line"></div>
-        <table>
-            {% for item in sale.items.all %}
-            <tr>
-                <td>{{ item.product.name }}</td>
-            </tr>
-            <tr>
-                <td>{{ item.quantity }} x {{ item.selling_price|intcomma }} {{ shop.currency }} </td>
-                <td style="text-align:right;">
-                    {{ item.total_price|intcomma }} {{ shop.currency }}
-                </td>
-            </tr>
+        }
+
+    </style>
+
+</head>
+
+<body onload="window.print()">
+
+    <!-- SHOP -->
+    <div class="center">
+
+        <h3>{{ shop.name }}</h3>
+
+        <p>{{ shop.address }}</p>
+
+        <p>
+            Tel : {{ shop.phone }}
+        </p>
+
+    </div>
+
+    <div class="line"></div>
+
+    <!-- FACTURE INFO -->
+
+    <p>
+        <strong>Facture :</strong>
+        {{ facture.reference }}
+    </p>
+
+    <p>
+        <strong>Date :</strong>
+        {{ facture.created_at|date:"d/m/Y H:i" }}
+    </p>
+
+    <p>
+        <strong>Vente :</strong>
+        #{{ sale.id }}
+    </p>
+
+    <p>
+        <strong>Client :</strong>
+
+        {% if facture.customer %}
+
+            {{ facture.customer.full_name }}
+
+            {% if facture.customer.phone %}
+                <br>
+                Tel : {{ facture.customer.phone }}
+            {% endif %}
+
+        {% else %}
+
+            Client Ordinaire
+
+        {% endif %}
+
+    </p>
+
+    <p>
+        <strong>Statut :</strong>
+
+        {% if facture.status == 'paid' %}
+
+            PAYÉE
+
+        {% elif facture.status == 'partial' %}
+
+            PARTIELLEMENT PAYÉE
+
+        {% elif facture.status == 'issued' %}
+
+            IMPAYÉE
+
+        {% elif facture.status == 'canceled' %}
+
+            ANNULÉE
+
+        {% else %}
+
+            BROUILLON
+
+        {% endif %}
+
+    </p>
+
+    <div class="line"></div>
+
+    <!-- ITEMS -->
+
+    <table>
+
+        {% for item in sale.items.all %}
+
+        <tr>
+            <td colspan="2">
+                {{ item.product.name }}
+            </td>
+        </tr>
+
+        <tr>
+
+            <td>
+                {{ item.quantity }}
+                x
+                {{ item.selling_price|intcomma }}
+                {{ shop.currency }}
+            </td>
+
+            <td class="right">
+
+                {{ item.total_price|intcomma }}
+                {{ shop.currency }}
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+    <div class="line"></div>
+
+    <!-- TOTALS -->
+
+    <table>
+
+        <tr>
+
+            <td>Total</td>
+
+            <td class="right">
+                {{ facture.total|intcomma }}
+                {{ shop.currency }}
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td>Payé</td>
+
+            <td class="right">
+                {{ facture.amount_paid|intcomma }}
+                {{ shop.currency }}
+            </td>
+
+        </tr>
+
+        <tr class="bold">
+
+            <td>Reste</td>
+
+            <td class="right">
+
+                {{ facture.remaining|intcomma }}
+                {{ shop.currency }}
+
+            </td>
+
+        </tr>
+
+    </table>
+
+    <div class="line"></div>
+
+    <!-- PAIEMENTS -->
+
+    {% if facture.paiements.exists %}
+
+        <div class="small">
+
+            <strong>Paiement(s)</strong><br>
+
+            {% for paiement in facture.paiements.all %}
+
+                -
+                {{ paiement.get_mode_paiement_display }}
+                :
+                {{ paiement.montant|intcomma }}
+                {{ shop.currency }}
+
+                <br>
+
             {% endfor %}
-        </table>
-        <div class="line"></div>
-        <strong>Total: {{ sale.total_amount|intcomma }} {{ shop.currency }}</strong>
-        <div class="line"></div>
-        <div style="text-align:center;">
-            Merci pour votre achat
+
         </div>
-    </body>
+
+        <div class="line"></div>
+
+    {% endif %}
+
+    <!-- FOOTER -->
+
+    <div class="center">
+
+        Merci pour votre confiance 🙏
+
+    </div>
+
+</body>
 </html>

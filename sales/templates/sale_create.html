@@ -9,65 +9,9 @@
 
 <div class="container-fluid">
     <div class="row">
+
         <!-- FORMULAIRE -->
         <div class="col-md-4">
-            <!-- INFOS VENTE -->
-            <div class="card mb-3 shadow-lg border-0">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        Informations vente
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <!-- CLIENT -->
-                    <form method="POST">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">
-                                Client
-                            </label>
-                            <select name="customer"
-                                    class="form-select">
-                                <option value="">
-                                    Client occasionnel
-                                </option>
-                                {% for customer in customers %}
-                                <option value="{{ customer.id }}"
-                                    {% if sale.customer == customer %}
-                                        selected
-                                    {% endif %}>
-                                    {{ customer.full_name }}
-                                    -
-                                    {{ customer.phone }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <!-- RESTAURANT -->
-                        {% if sale.is_restaurant_order %}
-                        <div class="alert alert-info">
-                            <strong>Table :</strong>
-                            {{ sale.restaurant_table.name }}
-                            <br>
-                            <strong>Serveur :</strong>
-                            {{ sale.user.username }}
-                        </div>
-                        {% endif %}
-                        <!-- FORM PRODUIT -->
-                        <div class="mb-3">
-                            {{ form.as_p }}
-                        </div>
-                        <!-- INFOS VENTE -->
-                        <div class="mb-3">
-                            {{ sale_form.as_p }}
-                        </div>
-                        <button type="submit" class="btn btn-outline-success btn-sm w-100">
-                            Ajouter produit
-                            <i class="bi bi-plus-square"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
 
             <!-- MESSAGES -->
             {% if messages %}
@@ -77,22 +21,104 @@
                 </div>
                 {% endfor %}
             {% endif %}
+
+            <!-- INFOS VENTE -->
+            <div class="card mb-3 shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Informations vente</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <!-- CLIENT -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Client</label>
+                            <select name="customer" class="form-select">
+                                <option value="">Client occasionnel</option>
+                                {% for customer in customers %}
+                                <option value="{{ customer.id }}"
+                                    {% if sale.customer == customer %}selected{% endif %}>
+                                    {{ customer.full_name }} - {{ customer.phone }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- RESTAURANT INFO -->
+                        {% if sale.is_restaurant_order %}
+                        <div class="alert alert-info">
+                            <strong>Table :</strong> {{ sale.restaurant_table.name }} <br>
+                            <strong>Serveur :</strong> {{ sale.user.username }}
+                        </div>
+                        {% endif %}
+
+                        <!-- FACTURE INFO -->
+                        {% if facture %}
+                        <div class="alert alert-secondary">
+                            <strong>Facture :</strong> {{ facture.reference }} <br>
+
+                            <strong>Statut :</strong>
+                            {% if facture.status == 'paid' %}
+                                <span class="badge bg-success">Payée</span>
+                            {% elif facture.status == 'partial' %}
+                                <span class="badge bg-warning">Partielle</span>
+                            {% elif facture.status == 'issued' %}
+                                <span class="badge bg-info">Émise</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Brouillon</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- PRODUIT -->
+                        <div class="mb-3">
+                            {{ form.as_p }}
+                        </div>
+
+                        <!-- FORM VENTE -->
+                        <div class="mb-3">
+                            {{ sale_form.as_p }}
+                        </div>
+
+                        <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                            Ajouter produit <i class="bi bi-plus-square"></i>
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
         </div>
 
         <!-- DETAIL COMMANDE -->
         <div class="col-md-8">
             <div class="card shadow border-0">
+
                 <div class="card-header bg-light">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Détail commande</h5>
+
+                        <h5 class="mb-0">
+                            Détail commande
+                            {% if facture %}
+                                <span class="badge bg-dark ms-2">{{ facture.reference }}</span>
+                            {% endif %}
+                        </h5>
+
                         {% if sale.customer %}
                         <span class="badge bg-primary">
-                            {{ sale.customer.full_name }}
+                            {{ sale.customer.full_name|default:"-" }}
                         </span>
                         {% endif %}
+
                     </div>
                 </div>
+
                 <div class="card-body">
+
+                    <!-- TABLE ITEMS -->
                     <div class="table-responsive">
                         <table class="table table-hover table-sm">
                             <thead>
@@ -104,15 +130,17 @@
                                     <th>Action</th>
                                 </tr>
                             </thead>
+
                             <tbody>
                                 {% for item in items %}
                                 <tr>
                                     <td>{{ item.product.name }}</td>
                                     <td>{{ item.quantity }}</td>
-                                    <td>{{ item.selling_price|intcomma }}{{ shop.currency }}</td>
-                                    <td>{{ item.total_price|intcomma }}{{ shop.currency }}</td>
+                                    <td>{{ item.selling_price|intcomma }} {{ shop.currency }}</td>
+                                    <td>{{ item.total_price|intcomma }} {{ shop.currency }}</td>
                                     <td>
-                                        <a class="btn btn-danger btn-sm" href="{% url 'sale:saleitem_delete' item.id %}">
+                                        <a class="btn btn-danger btn-sm"
+                                           href="{% url 'sale:saleitem_delete' item.id %}">
                                             <i class="bi bi-trash3"></i>
                                         </a>
                                     </td>
@@ -127,45 +155,87 @@
                             </tbody>
                         </table>
                     </div>
+
                     <hr>
-                    <!-- TOTAL -->
+
+                    <!-- TOTAL SALE -->
                     <div class="row">
                         <div class="col-md-6">
                             <h5>
-                                <span class="fw-bold">Total :</span>
+                                Total vente :
                                 <span class="text-primary">
-                                    {{ sale.total_amount|intcomma }}
-                                    {{ shop.currency }}
+                                    {{ sale.total_amount|intcomma }} {{ shop.currency }}
                                 </span>
                             </h5>
                         </div>
+
                         <div class="col-md-6 text-end">
                             <h6>
-                                <span class="fw-bold">Profit :</span>
+                                Profit :
                                 <span class="text-success">
-                                    {{ sale.total_profit|intcomma }}{{ shop.currency }}
+                                    {{ sale.total_profit|intcomma }} {{ shop.currency }}
                                 </span>
                             </h6>
                         </div>
                     </div>
+
+                    <!-- FACTURE DETAILS -->
+                    {% if facture %}
                     <hr>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Payé :</strong>
+                            <span class="text-success">
+                                {{ facture.amount_paid|intcomma }} {{ shop.currency }}
+                            </span>
+                        </div>
+
+                        <div class="col-md-4 text-center">
+                            <strong>Restant :</strong>
+                            <span class="text-danger">
+                                {{ facture.remaining|intcomma }} {{ shop.currency }}
+                            </span>
+                        </div>
+
+                        <div class="col-md-4 text-end">
+                            <strong>Statut :</strong>
+                            {% if facture.status == 'paid' %}
+                                <span class="badge bg-success">Payée</span>
+                            {% elif facture.status == 'partial' %}
+                                <span class="badge bg-warning">Partielle</span>
+                            {% elif facture.status == 'issued' %}
+                                <span class="badge bg-info">Émise</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Brouillon</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <hr>
+
                     <!-- ACTIONS -->
                     <div class="d-flex gap-2">
 
                         {% if items %}
-                        <a href="{% url 'sale:sale_finalize' %}" class="btn btn-outline-primary btn-sm">
-                            Finaliser la vente
-                            <i class="bi bi-check-square"></i>
+                        <a href="{% url 'sale:sale_finalize' %}"
+                           class="btn btn-outline-primary btn-sm">
+                            Finaliser la vente <i class="bi bi-check-square"></i>
                         </a>
                         {% endif %}
-                        <a href="{% url 'sale:sale_list' %}" class="btn btn-outline-secondary btn-sm">
-                            Retour
-                            <i class="bi bi-arrow-left-square"></i>
+
+                        <a href="{% url 'sale:sale_list' %}"
+                           class="btn btn-outline-secondary btn-sm">
+                            Retour <i class="bi bi-arrow-left-square"></i>
                         </a>
+
                     </div>
+
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 

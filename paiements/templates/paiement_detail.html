@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Paiement | Détail
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-primary text-white">
+            <h5>Détail du paiement</h5>
+        </div>
+
+        <div class="card-body">
+
+            <!-- FACTURE -->
+            <div class="mb-3">
+                <h6 class="text-muted">Facture</h6>
+                <p class="fw-bold">
+                    {{ facture.reference }}
+                </p>
+            </div>
+
+            <!-- MONTANT -->
+            <div class="mb-3">
+                <h6 class="text-muted">Montant payé</h6>
+                <p class="fs-4 text-success">
+                    {{ paiement.montant }} {{ facture.sale.shop.currency|default:"" }}
+                </p>
+            </div>
+
+            <!-- MODE -->
+            <div class="mb-3">
+                <h6 class="text-muted">Mode de paiement</h6>
+                <p>
+                    {% if paiement.mode_paiement == 'cash' %}
+                        <span class="badge bg-success">Cash</span>
+                    {% elif paiement.mode_paiement == 'card' %}
+                        <span class="badge bg-primary">Carte</span>
+                    {% elif paiement.mode_paiement == 'mobile_money' %}
+                        <span class="badge bg-warning text-dark">Mobile Money</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Crédit</span>
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- REFERENCE -->
+            <div class="mb-3">
+                <h6 class="text-muted">Référence transaction</h6>
+                <p>
+                    {{ paiement.reference_transaction|default:"-" }}
+                </p>
+            </div>
+
+            <!-- DATE -->
+            <div class="mb-3">
+                <h6 class="text-muted">Date</h6>
+                <p>
+                    {{ paiement.created_at|date:"Y-m-d H:i" }}
+                </p>
+            </div>
+
+            <hr>
+
+            <!-- FACTURE RESUME -->
+            <div class="row">
+
+                <div class="col-md-4">
+                    <strong>Total facture :</strong><br>
+                    {{ facture.total }}
+                </div>
+
+                <div class="col-md-4">
+                    <strong>Déjà payé :</strong><br>
+                    {{ facture.amount_paid }}
+                </div>
+
+                <div class="col-md-4">
+                    <strong>Reste :</strong><br>
+                    <span class="text-danger">
+                        {{ facture.remaining }}
+                    </span>
+                </div>
+
+            </div>
+
+            <hr>
+
+            <!-- ACTIONS -->
+            <div class="d-flex gap-2">
+
+                <a href="{% url 'paiement_update' paiement.id %}"
+                   class="btn btn-warning btn-sm">
+                    Modifier
+                </a>
+
+                <a href="{% url 'paiement_delete' paiement.id %}"
+                   class="btn btn-danger btn-sm">
+                    Supprimer
+                </a>
+
+                <a href="{% url 'paiement_list' facture.id %}"
+                   class="btn btn-secondary btn-sm">
+                    Retour
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
