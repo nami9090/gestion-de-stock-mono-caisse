@@ -4,34 +4,75 @@
 {% endblock %}
 {% load humanize %}
 {% block content %}
+{% for group in request.user.groups.all %}
 <div class="container-fluid">
-    {% for group in request.user.groups.all %}
-    <div class="card shadow">
-        <div class="card-header d-flex justify-content-between">
-            <h5>Listes de clients</h5>
-            <a href="{% url 'customer:customer_create' %}"
-               class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-square"></i> Ajouter client
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <h5 class="m-0 font-weight-bold text-primary">
+                Gestion des clients
+            </h5>
+            <a href="{% url 'customer:customer_create' %}" class="btn btn-outline-primary btn-sm">
+                + Nouveau client
             </a>
         </div>
+    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <h5>Listes de clients</h5>
+        </div>
         <div class="card-body">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
+            <!-- PAGINATION -->
+            {% if customers.has_other_pages %}
+                <nav>
+                  <ul class="pagination pagination-sm">
+                    {% if customers.has_previous %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ customers.previous_page_number }}">«</a>
+                      </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                      <span class="page-link">
+                        Page {{ customers.number }} / {{ customers.paginator.num_pages }}
+                      </span>
+                    </li>
+
+                    {% if customers.has_next %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ customers.next_page_number }}">»</a>
+                      </li>
+                    {% endif %}
+                  </ul>
+                </nav>
             {% endif %}
             <div class="table-responsive">
-                <div class="input-group">
-                   <input type="text" id="searchInput" class="form-control mb-2 rounded" placeholder="Rechercher ici...">
-                   <!--<span>filter</span>-->
-                </div>
+                <!-- SEARCH FULL WIDTH -->
+                <form method="GET" class="mb-3">
+                    <div class="input-group w-100">
+                        <input type="text"
+                               name="search"
+                               value="{{ search }}"
+                               class="form-control"
+                               placeholder="Fullname, phone, email">
+                        <button class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
                 <table class="table table-sm table-hover" id="dataTable">
                     <thead>
                         <tr>
                             <th>Nom</th>
                             <th>Téléphone</th>
                             <th>Email</th>
+                            <th>Impayé</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -48,17 +89,28 @@
                                 {{ customer.email }}
                             </td>
                             <td>
+                                {% if customer.total_impaye > 0 %}
+                                    <span class="badge bg-danger">
+                                        {{ customer.total_impaye|intcomma }} {{ shop.currency }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success">
+                                        0 {{ shop.currency }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
                                 <a href="{% url 'customer:customer_detail' customer.id %}"
-                                   class="btn btn-info btn-sm">
+                                   class="btn btn-outline-info btn-sm">
                                    <i class="bi bi-layout-text-sidebar-reverse"></i>
                                 </a>
                                 {% if group.name == 'Admin' %}
                                 <a href="{% url 'customer:customer_update' customer.id %}"
-                                   class="btn btn-warning btn-sm">
+                                   class="btn btn-outline-warning btn-sm">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <a href="{% url 'customer:customer_delete' customer.id %}"
-                                   class="btn btn-danger btn-sm">
+                                   class="btn btn-outline-danger btn-sm">
                                     <i class="bi bi-trash3"></i>
                                 </a>
                                 {% endif %}
@@ -66,7 +118,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="4"
+                            <td colspan="5"
                                 class="text-center">
                                 Aucun client
                             </td>
@@ -77,17 +129,6 @@
             </div>
         </div>
     </div>
-    {% endfor %}
 </div>
-<script>
-    document.getElementById("searchInput").addEventListener("keyup", function () {
-    const searchValue = this.value.toLowerCase();
-    const rows = document.querySelectorAll("#dataTable tbody tr");
-
-    rows.forEach(row => {
-        const rowText = row.textContent.toLowerCase();
-        row.style.display = rowText.includes(searchValue) ? "" : "none";
-        });
-    });
-</script>
+{% endfor %}
 {% endblock %}

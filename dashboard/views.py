@@ -90,7 +90,7 @@ def dashboard_admin(request):
 	recent_sales = Sale.objects.select_related(
 		'customer',
 		'user'
-	).order_by('-created_at')[:10]
+	).order_by('-created_at')[:5]
 
 	# =====================================
 	# TOP PRODUCTS
@@ -177,6 +177,7 @@ def dashboard_admin(request):
 @login_required
 @role_required('Caisse')
 def dashboard_caisse(request):
+	shop = ShopSettings.objects.first()
 	today = now().date()
 	ventes_jour = Sale.objects.filter(
 		created_at__date=today,
@@ -205,7 +206,7 @@ def dashboard_caisse(request):
 	ventes_recentes = Sale.objects.select_related(
 		'customer',
 		'restaurant_table'
-	).order_by('-created_at')[:10]
+	).order_by('-created_at')[:5]
 
 	tables_occupees = RestaurantTable.objects.filter(
 		status='occupee'
@@ -222,6 +223,7 @@ def dashboard_caisse(request):
 		'ventes_recentes': ventes_recentes,
 		'tables_occupees': tables_occupees,
 		'clients_total': clients_total,
+		'shop':shop,
 	}
 	return render(request, 'dashboard_caisse.html', context)
 

@@ -23,3 +23,11 @@ class UserActivityLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.action}"
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='profiles/', default='profiles/default.png')
+
+    def __str__(self):
+        return self.user.username

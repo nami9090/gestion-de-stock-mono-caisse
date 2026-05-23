@@ -62,6 +62,25 @@
                 </div>
             </div>
             <hr>
+            <div class="row mb-4">
+                <div class="col-lg-12">
+                    <div class="card shadow-lg border-left-danger">
+                        <div class="card-body">
+                            <h5 class="text-danger">
+                                Crédit accordé aujourd'hui
+                            </h5>
+                            <h3>
+                                {{ total_credit_today|intcomma }}
+                                {{ shop.currency }}
+                            </h3>
+                            <small class="text-muted">
+                                Factures non totalement payées aujourd'hui
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
             <!-- SALES TABLE -->
             <h4>Détails des ventes</h4>
             <div class="table-responsive">

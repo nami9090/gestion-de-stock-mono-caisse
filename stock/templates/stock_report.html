@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}
+    Rapport de stock
+{% endblock %}
+{% block content %}
+{% load humanize %}
+<div class="container-fluid">
+
+    <!-- HEADER -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="text-primary">Rapport de Stock</h4>
+            <p class="text-muted">Vue globale des produits et niveaux de stock</p>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6>Total produits</h6>
+                    <h3>{{ total_products }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6>Valeur totale stock</h6>
+                    <h3>{{ total_stock_value|intcomma }} {{ shop.currency }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-danger">
+                <div class="card-body">
+                    <h6>Produits en alerte</h6>
+                    <h3 class="text-danger">{{ low_stock_products.count }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <h6>Liste des produits</h6>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th>Produit</th>
+                        <th>Stock</th>
+                        <th>Min</th>
+                        <th>Prix vente</th>
+                        <th>Valeur stock</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr>
+                        <td>{{ p.name }}</td>
+                        <td>
+                            {% if p.stock <= p.minimum_stock %}
+                                <span class="badge bg-danger">{{ p.stock }}</span>
+                            {% else %}
+                                <span class="badge bg-success">{{ p.stock }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ p.minimum_stock }}</td>
+                        <td>{{ p.selling_price|intcomma }} {{ shop.currency }}</td>
+                        <td>{{ p.stock_value|intcomma }} {{ shop.currency }}</td>
+                        <td>
+                            {% if p.stock <= p.minimum_stock %}
+                                <span class="text-danger">Critique</span>
+                            {% else %}
+                                <span class="text-success">OK</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -30,12 +30,16 @@ ALLOWED_HOSTS = [
     "*",
     # www.nami.app.nafuv.org",
     # www.nami.app.nafuv.org/",
+    # "stock.app.nafuv.org",
+    # "www.stock.app.nafuv.org",
 ]
 
 
 CSRF_TRUSTED_ORIGINS = [
     "http://nami.app.nafuv.org/",
     "http://www.nami.app.nafuv.org/",
+    "https://stock.app.nafuv.org",
+    "https://www.stock.app.nafuv.org",
 ]
 
 # Application definition
@@ -107,7 +111,7 @@ DATABASES = {
     }
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'dttrabzf_musee_v',
+    #     'NAME': 'dttrabzf_smart',
     #     'USER': 'dttrabzf_nami_user',
     #     'PASSWORD': '123soleil@2025',
     #     'HOST':'localhost',
@@ -140,11 +144,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+
+TIME_ZONE = 'Africa/Bujumbura'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -160,11 +166,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 #version online on Cpanel
 
+#version online on Cpanel
+
 # STATIC_URL = '/static/'
-# STATIC_ROOT = '/home/dttrabzf/nami.app/static/'
+# STATIC_ROOT = '/home/dttrabzf/stock.app/static/'
 
 # MEDIA_URL = '/media/'
-# MEDIA_ROOT = '/home/dttrabzf/nami.app/media/'
+# MEDIA_ROOT = '/home/dttrabzf/stock.app/media/'
 
 
 # Default primary key field type

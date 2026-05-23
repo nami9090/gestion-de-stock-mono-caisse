@@ -1,103 +1,147 @@
 {% extends 'base.html' %}
 {% block title %}
-  Ajouter utilisateur | Admin
+Ajouter utilisateur | Admin
 {% endblock %}
 
-{% block content %}
 {% load humanize %}
-
+{% load static %}
+{% block content %}
 <div class="container-fluid">
     <div class="row">
+
+        <!-- ================= LEFT FORM ================= -->
         <div class="col-md-8">
+
             <!-- Titre -->
             <div class="card mb-4 shadow-lg">
-                <div class="card-header m-0 font-weight-bold text-primary">
+                <div class="card-header font-weight-bold text-primary">
                     FORMULAIRE UTILISATEUR
                 </div>
             </div>
+
+            <!-- Messages -->
             {% if messages %}
-            {% for message in messages %}
-                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">
-                {{ message }}
-                </div>
-            {% endfor %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
             {% endif %}
-            <div class="row justify-content-center">
-                <div class="col-md-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header text-primary">
-                            <h5 class="mb-0">
-                                {% if form.instance.pk %}
-                                    Modifier l’utilisateur
-                                {% else %}
-                                    Créer un utilisateur
-                                {% endif %}
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <form method="post">
-                                {% csrf_token %}
 
-                                {# ===================== INFOS UTILISATEUR ===================== #}
-                                <h6 class="text-primary mb-3">Informations utilisateur</h6>
+            <!-- Form Card -->
+            <div class="card shadow-sm">
+                <div class="card-header text-primary">
+                    <h5 class="mb-0">
+                        {% if form.instance.pk %}
+                            Modifier l’utilisateur
+                        {% else %}
+                            Créer un utilisateur
+                        {% endif %}
+                    </h5>
+                </div>
 
-                                {% for field in form %}
-                                    {% if field.name != "roles" %}
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">
-                                                {{ field.label }}
-                                            </label>
-                                            {{ field }}
-                                            {% if field.errors %}
-                                                <div class="text-danger small">
-                                                    {{ field.errors }}
-                                                </div>
-                                            {% endif %}
+                <div class="card-body">
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- ================= USER INFO ================= -->
+                        <h6 class="text-primary mb-3">Informations utilisateur</h6>
+
+                        {% for field in form %}
+                            {% if field.name != "roles" %}
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        {{ field.label }}
+                                    </label>
+
+                                    {{ field }}
+
+                                    {% if field.errors %}
+                                        <div class="text-danger small">
+                                            {{ field.errors }}
                                         </div>
                                     {% endif %}
-                                {% endfor %}
-
-                                {# ===================== ROLES ===================== #}
-                                <hr>
-                                <h6 class="text-primary mb-3">Rôles & permissions</h6>
-
-                                <div class="row">
-                                    {% for checkbox in form.roles %}
-                                        <div class="col-md-3 mb-2">
-                                            <div class="form-check border rounded p-2">
-                                                {{ checkbox.tag }}
-                                                <label class="form-check-label ms-1">
-                                                    <span class="badge bg-info text text-white">
-                                                        {{ checkbox.choice_label }}
-                                                    </span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    {% empty %}
-                                        <p class="text-muted">Aucun rôle disponible</p>
-                                    {% endfor %}
                                 </div>
+                            {% endif %}
+                        {% endfor %}
 
-                                {# ===================== ACTIONS ===================== #}
-                                <div class="d-flex justify-content-between mt-4">
-                                    <button type="submit" class="btn btn-primary btn-sm">
-                                        Enregistrer
-                                    </button>
-                                    <a href="{% url 'user:gestion_utilisateur' %}" class="btn btn-outline-secondary btn-sm">
-                                        Retour
-                                    </a>
-                                </div>
-
-                            </form>
+                        <!-- ================= PROFILE IMAGE ================= -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Photo de profil</label>
+                            <input type="file" name="image" class="form-control">
                         </div>
 
-                    </div>
+                        <hr>
+
+                        <!-- ================= ROLES ================= -->
+                        <h6 class="text-primary mb-3">Rôles & permissions</h6>
+
+                        <div class="row">
+                            {% for checkbox in form.roles %}
+                                <div class="col-md-3 mb-2">
+                                    <div class="form-check border rounded p-2">
+
+                                        {{ checkbox.tag }}
+
+                                        <label class="form-check-label ms-1">
+                                            <span class="badge bg-info text-white">
+                                                {{ checkbox.choice_label }}
+                                            </span>
+                                        </label>
+
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <p class="text-muted">Aucun rôle disponible</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- ================= ACTIONS ================= -->
+                        <div class="d-flex justify-content-between mt-4">
+
+                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-floppy"></i> Enregistrer
+                            </button>
+
+                            <a href="{% url 'user:gestion_utilisateur' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-arrow-left"></i> Retour
+                            </a>
+
+                        </div>
+
+                    </form>
+
                 </div>
             </div>
         </div>
-         <div class="col-md-4">
-            <h5>Hello H5</h5>
+
+        <!-- ================= RIGHT PANEL ================= -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header text-primary">
+                    Aperçu utilisateur
+                </div>
+
+                <div class="card-body text-center">
+
+                    {% if profile.image %}
+                        <img src="{{ profile.image.url }}"
+                             class="rounded-circle mb-3"
+                             width="80" height="80">
+                    {% else %}
+                        <img src="{% static 'default.png' %}" width="80" height="80">
+                    {% endif %}
+
+                    <h6>{{ edited_user.username }}</h6>
+                    <small class="text-muted">
+                        {{ edited_user.email }}
+                    </small>
+
+                </div>
+            </div>
         </div>
+
     </div>
 </div>
 {% endblock %}

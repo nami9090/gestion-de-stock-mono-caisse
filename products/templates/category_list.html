@@ -19,16 +19,17 @@
             </h6>
         </div>
         <div class="card-body">
-            <a href="{% url 'products:category_create' %}" class="btn btn-primary btn-sm mb-3">
-                Ajouter Categorie de produit
+            <a href="{% url 'products:category_create' %}" class="btn btn-outline-primary btn-sm mb-3">
+                <i class="bi bi-plus-lg"></i> Ajouter Categorie de produit
             </a>
             <div class="table-responsive">
                 <div class="input-group">
                    <input type="text" id="searchInput" class="form-control mb-2" placeholder="Rechercher ici...">
                 </div>
-                <table class="table table-sm table-bordered" id="dataTable">
-                    <thead class="table-primary">
+                <table class="table table-sm table-hover" id="dataTable">
+                    <thead>
                         <tr>
+                            <th>#ID</th>
                             <th>Nom</th>
                             <th>Description</th>
                             <th>Actions</th>
@@ -37,11 +38,16 @@
                     <tbody>
                         {% for category in categories %}
                         <tr>
+                            <td>{{ category.id }}</td>
                             <td>{{ category.name }}</td>
                             <td>{{ category.description }}</td>
                             <td>
-                                <a href="{% url 'products:category_update' category.id %}" class="btn btn-sm btn-warning">Modifier</a>
-                                <a href="{% url 'products:category_delete' category.id %}" class="btn btn-sm btn-danger">Supprimer</a>
+                                <a href="{% url 'products:category_update' category.id %}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'products:category_delete' category.id %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
                             </td>
                         </tr>
                         {% empty %}

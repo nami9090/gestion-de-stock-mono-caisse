@@ -8,7 +8,7 @@
 {% load humanize %}
 
 <div class="container-fluid">
-     {% if messages %}
+    {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }}">
                 {{ message }}

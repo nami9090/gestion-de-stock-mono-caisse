@@ -18,6 +18,9 @@ from restaurent.models import RestaurantTable
 
 from .pdf_closing import generate_closing_pdf
 
+from django.utils import timezone
+from django.db.models import Q
+
 ### Facture avec ReportLab
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
@@ -723,9 +726,21 @@ def sale_invoice_pos(request, pk):
 def closing_report_view(request):
     report = closing_report(request.user)
     shop = ShopSettings.objects.first()
+    today = timezone.now().date()
+
+    credits_today = Facture.objects.filter(
+        created_at__date=today,
+        status__in=['issued', 'partial']
+    )
+
+    total_credit_today = sum(
+        f.remaining for f in credits_today
+    )
     context = {
         "report": report,
-        "shop":shop
+        "shop":shop,
+        'credits_today': credits_today,
+        'total_credit_today': total_credit_today,
     }
     return render(request, "closing_report.html", context)
 

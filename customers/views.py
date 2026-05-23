@@ -4,31 +4,76 @@ from django.contrib import messages
 from .forms import CustomerForm
 from .models import Customer
 
-from django.db.models import Sum
+from django.db.models import (
+    Sum,
+    F,
+    Q,
+    DecimalField,
+    ExpressionWrapper,
+    Value
+)
+from django.core.paginator import Paginator
+from django.db.models.functions import Coalesce
 from factures.models import Facture
-
+from core.models import ShopSettings
 from sales.models import Sale
 from core.models import ShopSettings
 from accounts.decorators import role_required
 from django.contrib.auth.decorators import login_required
 
-
-# =========================
-# LISTE CLIENTS
-# =========================
 @login_required
 @role_required('Admin', 'Caisse')
 def customer_list(request):
-    query = request.GET.get('q')
-    customers = Customer.objects.all()
-    if query:
-        customers = customers.filter(full_name__icontains=query)
+    search = request.GET.get('search', '')
+    shop = ShopSettings.objects.first()
+    # ====================================
+    # CLIENTS + TOTAL IMPAYÉ
+    # ====================================
+    customers = Customer.objects.annotate(
+        total_impaye=Coalesce(
+            Sum(
+                ExpressionWrapper(
+                    F('facture__total') - F('facture__amount_paid'),
+                    output_field=DecimalField(
+                        max_digits=12,
+                        decimal_places=2
+                    )
+                ),
 
+                filter=Q(
+                    facture__status__in=['issued', 'partial']
+                )
+            ),
+            # IMPORTANT FIX
+            Value(
+                0,
+                output_field=DecimalField(
+                    max_digits=12,
+                    decimal_places=2
+                )
+            )
+        )
+
+    ).order_by('-id')
+    # ====================================
+    # SEARCH
+    # ====================================
+    if search:
+        customers = customers.filter(
+            Q(full_name__icontains=search) |
+            Q(phone__icontains=search) |
+            Q(email__icontains=search)
+        )
+    # ================= PAGINATION =================
+    paginator = Paginator(customers, 20)
+    page_number = request.GET.get('page')
+    customers = paginator.get_page(page_number)
     context = {
-        'customers': customers
+        'customers': customers,
+        'search': search,
+        'shop':shop
     }
-    return render(request, 'customer_list.html', context)
-
+    return render(request,'customer_list.html',context)
 
 # =========================
 # CREATION CLIENT
@@ -65,12 +110,20 @@ def customer_detail(request, pk):
     factures = Facture.objects.filter(
         customer=customer
     ).order_by('-created_at')
+    
+    # =====================================
+    # FACTURES IMPAYEES
+    # =====================================
+
     factures_impayees = factures.filter(
-        status__in=['issued', 'partial', 'draft']
+        status__in=['issued', 'partial']
     )
-    total_impaye = factures_impayees.aggregate(
-        total=Sum('total')
-    )['total'] or 0
+
+    # TOTAL RESTANT À PAYER
+    total_impaye = sum(
+        facture.total - facture.amount_paid
+        for facture in factures_impayees
+    )
     # =====================================
     # TOTAL SPENT
     # =====================================

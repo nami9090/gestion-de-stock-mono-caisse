@@ -25,7 +25,7 @@
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body">
                     <h6 class="text-muted">Ventes du jour</h6>
-                    <h2 class="fw-bold">{{ total_ventes|intcomma }}{{shop.currency}}</h2>
+                    <h2>{{ total_ventes|intcomma }} {{shop.currency}}</h2>
                 </div>
             </div>
         </div>
@@ -33,7 +33,7 @@
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body">
                     <h6 class="text-muted">Nombre de ventes</h6>
-                    <h2 class="fw-bold">{{ nombre_ventes }}</h2>
+                    <h2>{{ nombre_ventes }}</h2>
                 </div>
             </div>
         </div>
@@ -41,7 +41,7 @@
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body">
                     <h6 class="text-muted">Commandes restaurant</h6>
-                    <h2 class="fw-bold">{{ commandes_restaurant }}</h2>
+                    <h2>{{ commandes_restaurant }}</h2>
                 </div>
             </div>
         </div>
@@ -49,7 +49,7 @@
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body">
                     <h6 class="text-muted">Factures impayées</h6>
-                    <h2 class="fw-bold text-danger">{{ factures_impayees }}</h2>
+                    <h2 class="text-danger">{{ factures_impayees }}</h2>
                 </div>
             </div>
         </div>
@@ -97,7 +97,7 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table align-middle">
+                        <table class="table align-hover table-sm">
                             <thead>
                                 <tr>
                                     <th>Référence</th>
@@ -113,15 +113,12 @@
                                     <td>
                                         #{{ sale.id }}
                                     </td>
-
                                     <td>
                                         {{ sale.customer.nom|default:'Client anonyme' }}
                                     </td>
-
                                     <td>
-                                        {{ sale.total_amount }}
+                                        {{ sale.total_amount|intcomma }} {{shop.currency}}
                                     </td>
-
                                     <td>
                                         {% if sale.is_restaurant_order %}
                                             <span class="badge bg-success">
@@ -133,7 +130,6 @@
                                             </span>
                                         {% endif %}
                                     </td>
-
                                     <td>
                                         {{ sale.created_at|date:"d/m/Y H:i" }}
                                     </td>

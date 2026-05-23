@@ -114,6 +114,15 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                         <a class="collapse-item" href="{% url 'stock:stock_list' %}">
                            <span class="text-primary">Ravitailler produits</span>
                         </a>
+                        <a class="collapse-item" href="{% url 'stock:stock_report' %}">
+                           <span class="text-primary">Rapport global stock</span>
+                        </a>
+                        <a class="collapse-item" href="{% url 'stock:stock_monthly_report' %}">
+                           <span class="text-primary">Rapport mensuel stock</span>
+                        </a>
+                        <a class="collapse-item" href="{% url 'stock:stock_inventory_report' %}">
+                           <span class="text-primary">Inventeur stock</span>
+                        </a>
                     </div>
                 </div>
             </li>
@@ -122,7 +131,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCondition"
                     aria-expanded="true" aria-controls="collapseCondition">
-                    <i class="bi bi-bucket"></i>
+                    <i class="bi bi-people"></i>
                     <span>Gestion des fournisseurs</span>
                 </a>
                 <div id="collapseCondition" class="collapse" aria-labelledby="headingCondition"
@@ -179,7 +188,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUser"
                     aria-expanded="true" aria-controls="collapseUser">
-                    <i class="bi bi-file-earmark-break"></i>
+                    <i class="bi bi-person-lines-fill"></i>
                     <span>Gestion des utilisateurs</span>
                 </a>
                 <div id="collapseUser" class="collapse" aria-labelledby="headingReclamation"
@@ -293,7 +302,9 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
             <div id="content">
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-
+                    <li class="nav-item d-flex align-items-center px-3">
+                        <span id="realtime-clock" class="fw-bold text-primary"></span>
+                    </li>
                     <!-- Sidebar Toggle (Topbar) -->
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
@@ -443,8 +454,13 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                                         <span>{{ user.email }}</span>
                                     {% endif %}
                                 </span>
-                                <img class="img-profile rounded-circle"
-                                    src="img/undraw_profile.svg">
+                                {% if user.is_authenticated and user.profile and user.profile.image %}
+                                    <img class="img-profile rounded-circle"
+                                         src="{{ user.profile.image.url }}">
+                                {% else %}
+                                    <img class="img-profile rounded-circle"
+                                         src="{% static 'default.png' %}">
+                                {% endif %}
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -523,7 +539,33 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
             </div>
         </div>
     </div>
+    <script>
+    function updateClock() {
+        const now = new Date();
 
+        const options = {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        };
+
+        const formatted = now
+            .toLocaleString('fr-FR', options)
+            .toUpperCase();
+
+        document.getElementById('realtime-clock').innerText = formatted;
+    }
+
+    // update immédiat
+    updateClock();
+
+    // mise à jour chaque seconde
+    setInterval(updateClock, 1000);
+    </script>
     <!-- Bootstrap core JavaScript-->
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>

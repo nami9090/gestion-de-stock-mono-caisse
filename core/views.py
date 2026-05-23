@@ -5,7 +5,6 @@ from django.forms import modelform_factory
 from django.contrib.auth.models import User, Group
 from django.template.loader import render_to_string
 
-from xhtml2pdf import pisa
 from django.core.paginator import Paginator
 from products.models import Product, Category
 from products.forms import ProductForm, CategoryForm
@@ -28,7 +27,7 @@ from django.contrib import messages
 from .models import ShopSettings
 from .forms import ShopSettingsForm
 
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Q
 from accounts.decorators import role_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -75,8 +74,19 @@ def shop_settings_view(request):
 @login_required
 @role_required('Admin')
 def supplier_list(request):
+    search = request.GET.get('search', '')
     template = loader.get_template('supplier_list.html')
     suppliers = Supplier.objects.all()
+
+    # ====================================
+    # SEARCH
+    # ====================================
+    if search:
+        suppliers = suppliers.filter(
+            Q(name__icontains=search) |
+            Q(phone__icontains=search) |
+            Q(email__icontains=search)
+        )
     context = {
         'suppliers':suppliers
     }

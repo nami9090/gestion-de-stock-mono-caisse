@@ -175,7 +175,7 @@
                             Ventes récentes
                         </h5>
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover table-sm">
                                 <thead>
                                     <tr>
                                         <th>Référence</th>
@@ -194,7 +194,7 @@
                                             {{ sale.customer_name }}
                                         </td>
                                         <td>
-                                            {{ sale.total_amount|intcomma }}
+                                            {{ sale.total_amount|intcomma }} {{shop.currency}}
                                         </td>
                                         <td>
                                             {{ sale.created_at|date:"d/m/Y H:i" }}

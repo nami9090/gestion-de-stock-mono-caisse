@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User, Group
+from .models import Profile
 
 class UserCreateForm(forms.ModelForm):
     # password = forms.CharField(
@@ -31,7 +32,7 @@ class UserCreateForm(forms.ModelForm):
         password = cleaned_data.get("password")
         password_confirm = cleaned_data.get("password_confirm")
         if password and password_confirm and password != password_confirm:
-            self.add_error("Les mots de passe ne correspondent pas")
+            self.add_error("password_confirm", "Les mots de passe ne correspondent pas")
         return cleaned_data
 
     def save(self, commit=True):
@@ -43,3 +44,9 @@ class UserCreateForm(forms.ModelForm):
             user.groups.set(self.cleaned_data['roles'])
 
         return user
+
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['image']

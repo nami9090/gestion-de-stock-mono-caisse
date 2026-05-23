@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from accounts.decorators import role_required
 from django.contrib.auth.decorators import login_required
-
+from django.core.paginator import Paginator
 from core.models import ShopSettings
-
+from django.db.models import Q
 from .models import Product, Category
 from .forms import ProductForm, CategoryForm
 
@@ -11,10 +11,23 @@ from .forms import ProductForm, CategoryForm
 @login_required
 @role_required('Admin')
 def product_list(request):
+    search = request.GET.get('search', '')
     products = Product.objects.all().order_by('-created_at')
     shop = ShopSettings.objects.first()
+
+    #=============SEARCH===========================
+    if search:
+        products = products.filter(
+            Q(name__icontains=search) |
+            Q(category__name__icontains=search)
+        )
+
+    #================= PAGINATION ==================
+    paginator = Paginator(products, 20)
+    page_number = request.GET.get('page')
+    products = paginator.get_page(page_number)
     context = {
-        'produits':products,
+        'products':products,
         'shop':shop
     }
     return render(request, 'product_list.html', context)

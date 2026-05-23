@@ -24,11 +24,11 @@
                     <form method="POST">
                         {% csrf_token %}
                         {{ form.as_p }}
-                        <button type="submit" class="btn btn-success btn-sm">
-                            Enregistrer
+                        <button type="submit" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-floppy"></i> Enregistrer
                         </button>
-                        <a href="{% url 'products:product_list' %}" class="btn btn-secondary btn-sm">
-                            Annuler
+                        <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left"></i> Retour
                         </a>
                     </form>
                 </div>

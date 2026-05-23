@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Détail Stock | Admin
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <!-- HEADER -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="m-0 font-weight-bold text-primary">
+                    Détail du stock #{{ stock.id }}
+                </h5>
+                <small class="text-muted">
+                    Ajouté le {{ stock.date|date:"d/m/Y H:i" }}
+                </small>
+            </div>
+            <a href="{% url 'stock:stock_list' %}" class="btn btn-outline-secondary btn-sm">
+                ← Retour
+            </a>
+        </div>
+    </div>
+
+    <!-- DETAILS -->
+    <div class="row">
+        <!-- INFOS PRINCIPALES -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        Informations du stock
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th>Produit :</th>
+                            <td>{{ stock.product.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Fournisseur :</th>
+                            <td>{{ stock.supplier.name|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Quantité :</th>
+                            <td>
+                                {% if stock.quantity < 10 %}
+                                    <span class="badge bg-danger">
+                                        {{ stock.quantity }} (Faible)
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success">
+                                        {{ stock.quantity }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Date :</th>
+                            <td>{{ stock.date|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Ajouté par :</th>
+                            <td>{{ stock.user.username|default:"-" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- ACTIONS / SIDEBAR -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        Actions
+                    </h6>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a href="{% url 'stock:stock_update' stock.id %}"
+                       class="btn btn-outline-warning">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="#"
+                       class="btn btn-outline-danger">
+                        <i class="bi bi-trash3"></i>
+                    </a>
+                </div>
+            </div>
+            <!-- QUICK INFO -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        Résumé
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1">
+                        <strong>ID :</strong> {{ stock.id }}
+                    </p>
+                    <p class="mb-1">
+                        <strong>Produit :</strong> {{ stock.product.name }}
+                    </p>
+                    <p class="mb-1">
+                        <strong>Quantité :</strong> {{ stock.quantity }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Statut :</strong>
+                        {% if stock.quantity < 10 %}
+                            <span class="text-danger">Stock faible</span>
+                        {% else %}
+                            <span class="text-success">OK</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

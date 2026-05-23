@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}
-  Gestion utilisateur | Admin
+  Liste utilisateurs | Admin
 {% endblock %}
 {% block content %}
 {% load humanize %}
@@ -22,11 +22,13 @@
     <div class="card shadow">
         <div class="card-header">
             <h6 class="m-0 font-weight-bold text-primary">
-               Gestion des utilisateurs 
+               Liste des utilisateurs 
             </h6>
         </div>
         <div class="card-body">
-            <a href="{% url 'user:creer_utilisateur' %}" class="btn btn-success btn-sm mb-2">Créer utilisateur</a>
+            <a href="{% url 'user:creer_utilisateur' %}" class="btn btn-outline-success btn-sm mb-2">
+                <i class="bi bi-plus-lg"></i> Créer utilisateur
+            </a>
             <div class="table-responsive">
                 <div class="input-group">
                   <input type="text" id="searchInput" class="form-control mb-3"  placeholder="Rechercher (Nom utilisateur,Email,Actif, Role...)">
@@ -54,10 +56,11 @@
                   </ul>
                 </nav>
                 {% endif %}
-                <table class="table table-sm table-bordered" id="dataTable">
-                    <thead class="table-primary">
+                <table class="table table-sm table-hover" id="dataTable">
+                    <thead>
                         <tr>
-                            <th>Utilisateur</th>
+                            <th>#ID</th>
+                            <th>Username</th>
                             <th>Email</th>
                             <th>Actif</th>
                             <th>Groupes</th>
@@ -67,6 +70,7 @@
                     <tbody>
                     {% for u in utilisateurs %}
                         <tr>
+                            <td>#{{ u.id }}</td>
                             <td>{{ u.username }}</td>
                             <td>{{ u.email }}</td>
                             <td>
@@ -86,12 +90,35 @@
                                 {% endfor %}
                             </td>
                             <td>
-                                <a href="{% url 'user:update_utilisateur' u.id %}" class="btn btn-primary btn-sm">Modifier</a>
-                                <a href="{% url 'user:activer_desactiver_utilisateur' u.id %}" class="btn btn-warning btn-sm">
-                                    {% if u.is_active %}Désactiver{% else %}Activer{% endif %}
-                                </a>
-                                <!-- Lien de suppression -->
-                                <a href="{% url 'user:supprimer_utilisateur' u.id %}" class="btn btn-danger btn-sm">Supprimer</a>
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <a href="{% url 'user:update_utilisateur' u.id %}"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+                                    <div class="custom-control custom-switch m-0">
+                                        <input type="checkbox"
+                                               class="custom-control-input"
+                                               id="userSwitch{{ u.id }}"
+                                               {% if u.is_active %}checked{% endif %}
+                                               onchange="window.location.href='{% url 'user:activer_desactiver_utilisateur' u.id %}'">
+
+                                        <label class="custom-control-label"
+                                               for="userSwitch{{ u.id }}"></label>
+                                    </div>
+
+                                    <a href="{% url 'user:supprimer_utilisateur' u.id %}"
+                                       class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash3"></i>
+                                    </a>
+
+                                    <a href="{% url 'user:user_activity' u.id %}"
+                                       class="btn btn-outline-success btn-sm">
+                                        <i class="bi bi-list-task"></i>
+                                    </a>
+
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
