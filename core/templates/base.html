@@ -25,7 +25,136 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
 
     <!-- Custom styles for this template-->
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
+    <style>
 
+    /* ===== DARK MODE ===== */
+
+    body.dark-mode {
+        background-color: #121212 !important;
+        color: #ffffff !important;
+
+    }
+
+    body.dark-mode #content-wrapper {
+        background-color: #1e1e1e !important;
+    }
+
+    body.dark-mode .topbar {
+        background-color: #1f1f1f !important;
+    }
+
+    body.dark-mode .card {
+        background-color: #2a2a2a !important;
+        color: white !important;
+        border: none !important;
+    }
+
+    body.dark-mode .table {
+        color: white !important;
+    }
+
+    body.dark-mode .bg-white {
+        background-color: #2a2a2a !important;
+    }
+
+    body.dark-mode .text-gray-800,
+    body.dark-mode .text-gray-600,
+    body.dark-mode .text-primary {
+        color: white !important;
+    }
+
+    body.dark-mode .dropdown-menu {
+        background-color: #2a2a2a !important;
+        color: white !important;
+    }
+
+    body.dark-mode .collapse-inner {
+        background-color: #2a2a2a !important;
+    }
+
+    body.dark-mode .collapse-item {
+        color: white !important;
+    }
+
+    body.dark-mode footer {
+        background-color: #1f1f1f !important;
+        color: white !important;
+    }
+
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea {
+        background-color: #333 !important;
+        color: white !important;
+        border: 1px solid #555 !important;
+    }
+
+    body.dark-mode input::placeholder {
+        color: #ccc !important;
+    }
+
+    .dark-mode .sidebar {
+        background: #1f1f1f !important;
+        background-image: none !important;
+    }
+
+    .dark-mode .sidebar .nav-link,
+    .dark-mode .sidebar .sidebar-brand,
+    .dark-mode .sidebar .sidebar-heading {
+        color: white !important;
+    }
+
+    .dark-mode .collapse-inner {
+        background-color: #2a2a2a !important;
+    }
+
+    .dark-mode .collapse-item {
+        color: white !important;
+    }
+
+    .dark-mode .collapse-item:hover {
+        background-color: #3a3a3a !important;
+    }
+
+    /* TABLE HOVER DARK MODE */
+
+    .dark-mode .table-hover tbody tr:hover {
+        background-color: #343a40 !important;
+        color: white !important;
+    }
+
+    .dark-mode .table-hover tbody tr:hover td {
+        color: white !important;
+    }
+
+    .dark-mode .table-hover tbody tr:hover th {
+        color: white !important;
+    }
+
+    .dark-mode .card-header.bg-white {
+        background-color: #23272b !important;
+        color: #ffffff !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    }
+
+    /* ===== BUTTON THEME ===== */
+
+    .theme-btn {
+        border: none;
+        padding: 8px 15px;
+        border-radius: 50px;
+        background: #4e73df;
+        color: white;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-left: 15px;
+    }
+
+    .theme-btn:hover {
+        transform: scale(1.05);
+    }
+
+    </style>
 </head>
 <body id="page-top">
     <!-- Page Wrapper -->
@@ -305,144 +434,18 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                     <li class="nav-item d-flex align-items-center px-3">
                         <span id="realtime-clock" class="fw-bold text-primary"></span>
                     </li>
+                    <button class="theme-btn" onclick="toggleTheme()">
+                        🌙 Mode
+                    </button>
                     <!-- Sidebar Toggle (Topbar) -->
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
 
-
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
-
-                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-                        <li class="nav-item dropdown no-arrow d-sm-none">
-                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-search fa-fw"></i>
-                            </a>
-                            <!-- Dropdown - Messages -->
-                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
-                                aria-labelledby="searchDropdown">
-                                <form class="form-inline mr-auto w-100 navbar-search">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control bg-light border-0 small"
-                                            placeholder="Search for..." aria-label="Search"
-                                            aria-describedby="basic-addon2">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-primary" type="button">
-                                                <i class="fas fa-search fa-sm"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </li>
-
                         <!-- Nav Item - Alerts -->
-                        <li class="nav-item dropdown no-arrow mx-1">
-                            <!-- Dropdown - Alerts -->
-                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="alertsDropdown">
-                                <h6 class="dropdown-header">
-                                    Alerts Center
-                                </h6>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-primary">
-                                            <i class="fas fa-file-alt text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 12, 2019</div>
-                                        <span class="font-weight-bold">A new monthly report is ready to download!</span>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-success">
-                                            <i class="fas fa-donate text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 7, 2019</div>
-                                        $290.29 has been deposited into your account!
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-warning">
-                                            <i class="fas fa-exclamation-triangle text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 2, 2019</div>
-                                        Spending Alert: We've noticed unusually high spending for your account.
-                                    </div>
-                                </a>
-                                <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
-                            </div>
-                        </li>
-
                         <!-- Nav Item - Messages -->
-                        <li class="nav-item dropdown no-arrow mx-1">
-                            <!-- Dropdown - Messages -->
-                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="messagesDropdown">
-                                <h6 class="dropdown-header">
-                                    Message Center
-                                </h6>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_1.svg"
-                                            alt="...">
-                                        <div class="status-indicator bg-success"></div>
-                                    </div>
-                                    <div class="font-weight-bold">
-                                        <div class="text-truncate">Hi there! I am wondering if you can help me with a
-                                            problem I've been having.</div>
-                                        <div class="small text-gray-500">Emily Fowler · 58m</div>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_2.svg"
-                                            alt="...">
-                                        <div class="status-indicator"></div>
-                                    </div>
-                                    <div>
-                                        <div class="text-truncate">I have the photos that you ordered last month, how
-                                            would you like them sent to you?</div>
-                                        <div class="small text-gray-500">Jae Chun · 1d</div>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_3.svg"
-                                            alt="...">
-                                        <div class="status-indicator bg-warning"></div>
-                                    </div>
-                                    <div>
-                                        <div class="text-truncate">Last month's report looks great, I am very happy with
-                                            the progress so far, keep up the good work!</div>
-                                        <div class="small text-gray-500">Morgan Alvarez · 2d</div>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="https://source.unsplash.com/Mv9hjnEUHR4/60x60"
-                                            alt="...">
-                                        <div class="status-indicator bg-success"></div>
-                                    </div>
-                                    <div>
-                                        <div class="text-truncate">Am I a good boy? The reason I ask is because someone
-                                            told me that people say this to all dogs, even if they aren't good...</div>
-                                        <div class="small text-gray-500">Chicken the Dog · 2w</div>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
-                            </div>
-                        </li>
-
                         <div class="topbar-divider d-none d-sm-block"></div>
 
                         <!-- Nav Item - User Information -->
@@ -565,6 +568,31 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
 
     // mise à jour chaque seconde
     setInterval(updateClock, 1000);
+
+    // Charger le thème sauvegardé
+    if(localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+    } else {
+        document.body.classList.add("light-mode");
+    }
+
+    function toggleTheme() {
+
+        if(document.body.classList.contains("dark-mode")) {
+
+            document.body.classList.remove("dark-mode");
+            document.body.classList.add("light-mode");
+
+            localStorage.setItem("theme", "light");
+
+        } else {
+
+            document.body.classList.remove("light-mode");
+            document.body.classList.add("dark-mode");
+
+            localStorage.setItem("theme", "dark");
+        }
+    }
     </script>
     <!-- Bootstrap core JavaScript-->
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>

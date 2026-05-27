@@ -17,94 +17,161 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
 </head>
 <body class="bg-gradient-primary">
-    <div class="container">
-        <!-- Outer Row -->
-        <div class="row justify-content-center">
-            <div class="col-xl-10 col-lg-12 col-md-9">
-                <div class="card o-hidden border-0 shadow-lg my-5">
-                    <div class="card-body p-0">
-                        <!-- Nested Row within Card Body -->
-                        <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block bg-login-image">
-                                {% if shop.logo %}
-                                    <img src="{{ shop.logo.url }}" class="text-center img-fluid">
-                                    <p class="text-center h6 text-primary mb-4">{{ shop.name }}</p>
-                                {% else %}
-                                    <img src="{% static 'img/default.jpg' %}" class="img-fluid">
-                                {% endif %}
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="p-5">
-                                    {% if messages %}
-                                        {% for message in messages %}
-                                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                                {{ message }}
-                                                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                                            </div>
-                                        {% endfor %}
-                                    {% endif %}
-                                    <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
-                                    </div>
-                                    <form method="POST" class="user">
-                                        {% csrf_token %}
 
-                                        <div class="form-group">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text border-0 bg-light">
-                                                        <i class="bi bi-person-fill text-primary"></i>
-                                                    </span>
-                                                </div>
+<style>
+    body {
+        overflow: hidden;
+        font-family: 'Nunito', sans-serif;
+    }
 
-                                                <input type="text"
-                                                       name="username"
-                                                       class="form-control form-control-user"
-                                                       placeholder="Nom d'utilisateur"
-                                                       required>
-                                            </div>
-                                        </div>
+    /* Background animé */
+    .bg-animation {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(-45deg, #4e73df, #1cc88a, #36b9cc, #2c3e50);
+        background-size: 400% 400%;
+        animation: gradientMove 10s ease infinite;
+        z-index: -2;
+    }
 
-                                        <div class="form-group">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text border-0 bg-light">
-                                                        <i class="bi bi-lock-fill text-primary"></i>
-                                                    </span>
-                                                </div>
+    @keyframes gradientMove {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
 
-                                                <input type="password"
-                                                       name="password"
-                                                       class="form-control form-control-user"
-                                                       placeholder="Mot de passe"
-                                                       required>
-                                            </div>
-                                        </div>
+    /* Glass card */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.2);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        animation: fadeIn 1s ease;
+    }
 
-                                        <button type="submit" class="btn btn-outline-primary btn-user btn-block">
-                                            Login
-                                        </button>
-                                    </form>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-                                    <hr>
-                                    <div class="text-center">
-                                        <a class="small" href="">Service technique</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    .login-title {
+        font-weight: 700;
+        color: white;
+    }
+
+    .form-control-user {
+        border-radius: 50px;
+        padding: 12px;
+    }
+
+    .btn-login {
+        border-radius: 50px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .btn-login:hover {
+        transform: scale(1.05);
+    }
+
+    .logo-box img {
+        width: 90px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid white;
+    }
+</style>
+
+<div class="bg-animation"></div>
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+
+    <div class="col-xl-5 col-lg-6 col-md-8">
+
+        <div class="glass-card p-5 text-center text-white">
+
+            <!-- LOGO -->
+            <div class="logo-box mb-3">
+                {% if shop.logo %}
+                    <img src="{{ shop.logo.url }}">
+                {% else %}
+                    <img src="{% static 'img/default.jpg' %}">
+                {% endif %}
             </div>
+
+            <h3 class="login-title">Smart POS System</h3>
+            <p class="text-white-50">Restaurant • Stock • Facturation</p>
+
+            <!-- ALERTS -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-warning">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- FORM -->
+            <form method="POST" class="mt-4">
+                {% csrf_token %}
+
+                <div class="form-group mb-3">
+                    <input type="text" name="username"
+                           class="form-control form-control-user"
+                           placeholder="Nom d'utilisateur" required>
+                </div>
+
+                <div class="form-group mb-3">
+                    <input type="password" name="password"
+                           class="form-control form-control-user"
+                           placeholder="Mot de passe" required>
+                </div>
+                <!-- Loader -->
+                <div id="loginLoader" style="display:none; margin-bottom: 15px;">
+                    <div class="spinner-border text-light" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    <span style="margin-left:10px;">Connexion en cours...</span>
+                </div>
+                <button type="submit" class="btn btn-light btn-block btn-login w-100">
+                    🔐 Se connecter
+                </button>
+            </form>
+
+            <hr class="bg-white">
+
+            <small class="text-white-50">
+                Système sécurisé - Accès réservé aux employés
+            </small>
+
         </div>
     </div>
-</body>
+</div>
 <footer>
     <div class="text-center mt-4">
     <small class="text-muted">
         Smart Stock System v1.0
     </small>
 </div>
+<script>
+    const form = document.querySelector('form');
+    const loader = document.getElementById('loginLoader');
+    const btn = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', function() {
+        // Affiche le loader
+        loader.style.display = 'flex';
+        loader.style.alignItems = 'center';
+        loader.style.justifyContent = 'center';
+
+        // Désactive le bouton pour éviter double click
+        btn.disabled = true;
+        btn.innerText = 'Connexion...';
+    });
+</script>
 <!-- Bootstrap core JavaScript-->
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>

@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'customers',
     'factures.apps.FacturesConfig',
     'paiements.apps.PaiementsConfig',
+    'home',
     'bootstrap5',
 ]
 
