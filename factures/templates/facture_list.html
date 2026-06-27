@@ -17,11 +17,11 @@
           {% endfor %}
     {% endif %}
     <div class="card shadow">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-white text-primary">
             <h5>Liste des factures</h5>
         </div>
         <div class="card-body">
-            <a href="{% url 'facture:facture_create' %}" class="btn btn-success btn-sm mb-3">
+            <a href="{% url 'facture:facture_create' %}" class="btn btn-outline-success btn-sm mb-3">
                 Nouvelle facture <i class="bi bi-plus-square"></i>
             </a>
             <div class="table-responsive">
@@ -45,19 +45,19 @@
                         {% for f in factures %}
                         <tr>
                             <td>{{ f.reference }}</td>
-                            <td>{{ f.customer.full_name|default:"-" }}</td>
+                            <td>{{ f.customer.full_name|default:"Client occasionel" }}</td>
                             <td>{{ f.total|intcomma }} {{ shop.currency }}</td>
                             <td>{{ f.amount_paid|intcomma }} {{ shop.currency }}</td>
                             <td class="text-danger">{{ f.remaining|intcomma }} {{ shop.currency }}</td>
                             <td>
                                 {% if f.status == 'paid' %}
-                                    <span class="badge bg-success">Payée</span>
+                                    <span class="badge bg-success text-white">Payée</span>
                                 {% elif f.status == 'partial' %}
-                                    <span class="badge bg-warning">Partielle</span>
+                                    <span class="badge bg-warning text-white">Partielle</span>
                                 {% elif f.status == 'issued' %}
-                                    <span class="badge bg-info">Émise</span>
+                                    <span class="badge bg-info text-white">Émise</span>
                                 {% else %}
-                                    <span class="badge bg-secondary">Brouillon</span>
+                                    <span class="badge bg-secondary text-white">Brouillon</span>
                                 {% endif %}
                             </td>
                             <td>

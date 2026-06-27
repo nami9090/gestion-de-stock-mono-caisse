@@ -648,7 +648,7 @@ def sale_delete(request, pk):
 
     # Empêcher suppression si finalisée
     if sale.status == 'completed':
-        messages.error(request, "Impossible de supprimer une vente finalisée.")
+        messages.warning(request, "Impossible de supprimer une vente finalisée.")
         return redirect('sale:sale_list')
     if request.method == "POST":
         #Supprimer les items (stock remis automatiquement)

@@ -80,11 +80,13 @@ def facture_update(request, pk):
 @role_required('Admin')
 def facture_delete(request, pk):
     facture = get_object_or_404(Facture, id=pk)
+    shop = ShopSettings.objects.first()
     if request.method == "POST":
         facture.delete()
         messages.success(request, "Facture supprimée.")
         return redirect('facture:facture_list')
     context = {
-        "facture": facture
+        "facture": facture,
+        "shop":shop
     }
     return render(request, "facture_confirm_delete.html", context)

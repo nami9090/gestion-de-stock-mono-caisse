@@ -15,7 +15,7 @@
             </h5>
             {% if group.name == 'Admin' %}
             <a href="{% url 'products:product_create' %}" class="btn btn-outline-primary btn-sm">
-                + Nouvau produit
+                <i class="bi bi-plus-lg"></i> Nouvau produit
             </a>
             {% endif %}
         </div>
@@ -76,7 +76,7 @@
                 <table class="table table-sm table-hover">
                     <thead>
                         <tr>
-                            <th>#ID</th>
+                            <th>#</th>
                             <th>Nom</th>
                             <th>Catégorie</th>
                             <th>Prix Achat</th>
@@ -101,7 +101,7 @@
 
                             <!-- Marge -->
                             <td>
-                                <span class="badge bg-info">
+                                <span class="badge bg-info text-white">
                                     {{ product.profit_margin|intcomma }} {{shop.currency}}
                                 </span>
                             </td>
@@ -114,11 +114,11 @@
                             <!-- Stock -->
                             <td>
                                 {% if product.stock <= product.minimum_stock %}
-                                    <span class="badge bg-danger">
+                                    <span class="badge bg-danger text-white">
                                         {{ product.stock }}
                                     </span>
                                 {% else %}
-                                    <span class="badge bg-success">
+                                    <span class="badge bg-success text-white">
                                         {{ product.stock }}
                                     </span>
                                 {% endif %}

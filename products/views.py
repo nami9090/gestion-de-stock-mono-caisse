@@ -81,7 +81,20 @@ def product_detail(request, pk):
 @login_required
 @role_required('Admin')
 def category_list(request):
+    search = request.GET.get('search', '')
     categories = Category.objects.all().order_by('name')
+
+    #=============SEARCH===========================
+    if search:
+        categories = categories.filter(
+            Q(name__icontains=search)
+        )
+
+    #================= PAGINATION ==================
+    paginator = Paginator(categories, 20)
+    page_number = request.GET.get('page')
+    categories = paginator.get_page(page_number)
+
     context = {
         'categories':categories
     }
@@ -103,7 +116,7 @@ def category_create(request):
 @role_required('Admin')
 def category_update(request, pk):
     categorie = get_object_or_404(Category, pk=pk)
-    form = ProductForm(request.POST or None, instance=categorie)
+    form = CategoryForm(request.POST or None, instance=categorie)
     if form.is_valid():
         form.save()
         return redirect('products:category_list')

@@ -57,7 +57,7 @@ def dashboard_admin(request):
 	total_impaye = Facture.objects.filter(
 		status__in=['issued', 'partial']
 	).aggregate(
-		total=Sum('total')
+		total=Sum(F('total') - F('amount_paid'))
 	)['total'] or 0
 
 	# =====================================

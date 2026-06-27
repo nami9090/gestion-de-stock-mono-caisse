@@ -434,7 +434,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                     <li class="nav-item d-flex align-items-center px-3">
                         <span id="realtime-clock" class="fw-bold text-primary"></span>
                     </li>
-                    <button class="theme-btn" onclick="toggleTheme()">
+                    <button id="theme-btn" class="theme-btn btn-sm" onclick="toggleTheme()">
                         🌙 Mode
                     </button>
                     <!-- Sidebar Toggle (Topbar) -->
@@ -468,21 +468,21 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                <a class="dropdown-item text-dark" href="#">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2"></i>
                                     Profile
                                 </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                                <a class="dropdown-item text-dark" href="#">
+                                    <i class="fas fa-cogs fa-sm fa-fw mr-2"></i>
                                     Settings
                                 </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+                                <a class="dropdown-item text-dark" href="#">
+                                    <i class="fas fa-list fa-sm fa-fw mr-2"></i>
                                     Activity Log
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'user:logout' %}" data-toggle="modal" data-target="#logoutModal">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                <a class="dropdown-item text-dark" href="{% url 'user:logout' %}" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
                                     Logout
                                 </a>
                             </div>
@@ -528,14 +528,14 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-white">
                     <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                        <span aria-hidden="true" class="text-dark">X</span>
                     </button>
                 </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
+                <div class="modal-body bg-white">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer bg-white">
                     <button class="btn btn-outline-secondary btn-sm" type="button" data-dismiss="modal">Cancel</button>
                     <a class="btn btn-outline-primary btn-sm" href="{% url 'user:login' %}">Logout</a>
                 </div>
@@ -576,14 +576,55 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
         document.body.classList.add("light-mode");
     }
 
+    // function toggleTheme() {
+
+    //     if(document.body.classList.contains("dark-mode")) {
+
+    //         document.body.classList.remove("dark-mode");
+    //         document.body.classList.add("light-mode");
+
+    //         localStorage.setItem("theme", "light");
+
+    //     } else {
+
+    //         document.body.classList.remove("light-mode");
+    //         document.body.classList.add("dark-mode");
+
+    //         localStorage.setItem("theme", "dark");
+    //     }
+
+    // }
+    </script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const btn = document.getElementById("theme-btn");
+
+        // Charger le thème enregistré
+        const savedTheme = localStorage.getItem("theme");
+
+        if (savedTheme === "dark") {
+            document.body.classList.add("dark-mode");
+            document.body.classList.remove("light-mode");
+            btn.innerHTML = "⭐ Mode";
+        } else {
+            document.body.classList.add("light-mode");
+            document.body.classList.remove("dark-mode");
+            btn.innerHTML = "🌙 Mode";
+        }
+    });
+
     function toggleTheme() {
 
-        if(document.body.classList.contains("dark-mode")) {
+        const btn = document.getElementById("theme-btn");
+
+        if (document.body.classList.contains("dark-mode")) {
 
             document.body.classList.remove("dark-mode");
             document.body.classList.add("light-mode");
 
             localStorage.setItem("theme", "light");
+            btn.innerHTML = "🌙 Mode";
 
         } else {
 
@@ -591,6 +632,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.c
             document.body.classList.add("dark-mode");
 
             localStorage.setItem("theme", "dark");
+            btn.innerHTML = "⭐ Mode";
         }
     }
     </script>

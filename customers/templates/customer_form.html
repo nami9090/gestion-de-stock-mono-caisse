@@ -4,9 +4,9 @@
 {% endblock %}
 {% block content %}
 
-<div class="container-fluid mt-4">
+<div class="container-fluid mb-4">
     <div class="card shadow">
-        <div class="card-header">
+        <div class="card-header bg-white">
             <h5>
                 {% if customer %}
                     Modifier client
@@ -20,12 +20,11 @@
                 {% csrf_token %}
                 {{ form.as_p }}
                 <button class="btn btn-outline-success btn-sm">Enregistrer</button>
+
+                <a href="{% url 'customer:customer_list' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left-square"></i> Retour
+                </a>
             </form>
-        </div>
-        <div class="card-footer">
-            <a href="{% url 'customer:customer_list' %}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left-square"></i> Retour
-            </a>
         </div>
     </div>
 </div>

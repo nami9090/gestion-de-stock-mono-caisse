@@ -6,8 +6,8 @@
 {% block content %}
 
 <div class="container-fluid">
-    <div class="card shadow">
-        <div class="card-header">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-white">
             <h4>
                 {{ customer.full_name }}
             </h4>
@@ -103,7 +103,7 @@
                 Total impayé : {{ total_impaye|intcomma }} {{shop.currency}}
             </h5>
         </div>
-        <div class="card-footer">
+        <div class="card-footer bg-white">
             <a href="{% url 'customer:customer_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left-square"></i> Retour</a>
         </div>
     </div>

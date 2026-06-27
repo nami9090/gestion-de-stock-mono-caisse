@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-
+{% block title %} Supression facture {% endblock %}
 {% block content %}
-
-<div class="container mt-4">
+{% load humanize %}
+<div class="container-fluid mt-4">
 
     <div class="card shadow border-0">
 
-        <div class="card-header bg-danger text-white">
+        <div class="card-header bg-white text-dark">
             <h5>Supprimer la facture</h5>
         </div>
 
@@ -25,13 +25,13 @@
                 {{ facture.customer.full_name|default:"-" }} <br>
 
                 <strong>Total :</strong>
-                {{ facture.total }} <br>
+                {{ facture.total|intcomma }} {{ shop.currency }} <br>
 
                 <strong>Payé :</strong>
-                {{ facture.amount_paid }} <br>
+                {{ facture.amount_paid|intcomma }} {{ shop.currency }} <br>
 
                 <strong>Reste :</strong>
-                <span class="text-danger">{{ facture.remaining }}</span>
+                <span class="text-danger">{{ facture.remaining|intcomma }} {{shop.currency}}</span>
             </p>
 
             <hr>
@@ -39,11 +39,11 @@
             <form method="POST">
                 {% csrf_token %}
 
-                <button type="submit" class="btn btn-danger w-100">
+                <button type="submit" class="btn btn-outline-danger w-100">
                     Oui, supprimer
                 </button>
 
-                <a href="{% url 'facture:facture_list' %}" class="btn btn-secondary w-100 mt-2">
+                <a href="{% url 'facture:facture_list' %}" class="btn btn-outline-secondary w-100 mt-2">
                     Annuler
                 </a>
 

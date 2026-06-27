@@ -74,7 +74,7 @@ def stock_create(request):
                     stock_entry.user = request.user
                     stock_entry.save()
 
-                    # 🔥 AJOUT STOCK UNE SEULE FOIS
+                    # AJOUT STOCK UNE SEULE FOIS
                     product = stock_entry.product
                     product.stock += stock_entry.quantity
                     product.save()
